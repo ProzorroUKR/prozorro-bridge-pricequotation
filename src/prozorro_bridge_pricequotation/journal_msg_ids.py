@@ -1,0 +1,5 @@
+TENDER_SWITCHED = "tender_switched"
+TENDER_NOT_SWITCHED = "tender_not_switched"
+TENDER_ALREADY_IN_PROCESS = "tender_already_in_process"
+TENDER_EXCEPTION = "tender_exception"
+MONGODB_EXCEPTION = "c_mongodb_exception"
