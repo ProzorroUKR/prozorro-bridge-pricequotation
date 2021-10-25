@@ -45,10 +45,6 @@ review:
           --wait
   only:
     - branches
-  except:
-    - master
-  when: manual
-
 
 stop_review:
   stage: deploy
@@ -62,6 +58,3 @@ stop_review:
     - shell
   only:
     - branches
-  except:
-    - master
-  when: manual
