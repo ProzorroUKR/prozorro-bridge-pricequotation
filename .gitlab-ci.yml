@@ -1,0 +1,94 @@
+stages:
+  - build
+  #  - test
+  - deploy
+
+variables:
+  CI_TAG: ci-$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
+  REPO_URL: http://repo-staging.dc.prozorro.gov.ua/repos/helm/
+
+build:
+  image: docker:git
+  stage: build
+  tags:
+    - shell
+  script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_TAG .
+    - docker tag $CI_REGISTRY_IMAGE:$CI_TAG $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  only:
+    - branches
+    - tags
+
+#test:
+#  image: docker:git
+#  only:
+#    - branches
+#  services:
+#    - docker:dind
+#  before_script:
+#    - apk add --no-cache py3-pip python3-dev libffi-dev openssl-dev curl gcc libc-dev make
+#    - pip install docker-compose==1.13.0
+#    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+#
+#  script:
+#    - echo '127.0.0.1 couchdb' >> /etc/hosts
+#    - pip install pytest
+#    - git clone https://github.com/ProzorroUKR/openprocurement.api.git src/opcr
+#    - cp etc/*.ini src/opcr/etc/
+#    - docker-compose build
+#    - docker-compose up api
+#    - cd ../../
+#    - pip install -e .
+#    - pytest tests/
+
+review:
+  stage: deploy
+  dependencies:
+    - build
+  tags:
+    - shell
+  environment:
+    name: review/${CI_COMMIT_REF_SLUG}
+    action: start
+    url: http://api.${CI_COMMIT_REF_SLUG}.${K8S_DOMAIN}/api/2.5/tenders
+    on_stop: stop_review
+    auto_stop_in: 1 day
+  variables:
+    API_TAG: "2.6.63"
+    TAG: $CI_COMMIT_REF_SLUG
+    API_HOST: http://api.${CI_COMMIT_REF_SLUG}.$K8S_DOMAIN
+  script:
+    - helm3 repo add prozorro $REPO_URL
+    - helm3 repo update
+    - helm3 --debug upgrade $CI_COMMIT_REF_SLUG --install prozorro/prozorro --namespace dev-prozorro
+          --set prozorro.api.image.tag=$API_TAG
+          --set deployAuctions=false
+          --set deployAuction=true
+          --wait
+    - helm3 --debug upgrade ${CI_COMMIT_REF_SLUG}-pricequotation --install prozorro/prozorro-bribge-pricequotation --namespace dev-prozorro
+          --set pricequotation.container.environment.PUBLIC_API_HOST=$API_HOST
+          --wait
+  only:
+    - branches
+  except:
+    - master
+  when: manual
+
+
+stop_review:
+  stage: deploy
+  script:
+    - helm3 delete $CI_COMMIT_REF_SLUG
+    - helm3 delete $CI_COMMIT_REF_SLUG-pricequotation
+  environment:
+    name: review/${CI_COMMIT_REF_SLUG}
+    action: stop
+  tags:
+    - shell
+  only:
+    - branches
+  except:
+    - master
+  when: manual
