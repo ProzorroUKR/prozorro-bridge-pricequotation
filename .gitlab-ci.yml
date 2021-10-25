@@ -1,3 +1,7 @@
+stages:
+  - build
+  - deploy
+
 variables:
   CI_TAG: ci-$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHORT_SHA
   REPO_URL: http://repo-staging.dc.prozorro.gov.ua/repos/helm/
@@ -12,9 +16,6 @@ build:
     - docker build -t $CI_REGISTRY_IMAGE:$CI_TAG .
     - docker tag $CI_REGISTRY_IMAGE:$CI_TAG $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
-  only:
-    - branches
-    - tags
 
 review:
   stage: deploy
@@ -43,8 +44,6 @@ review:
     - helm3 --debug upgrade ${CI_COMMIT_REF_SLUG}-pricequotation --install prozorro/prozorro-bribge-pricequotation --namespace dev-prozorro
           --set pricequotation.container.environment.PUBLIC_API_HOST=$API_HOST
           --wait
-  only:
-    - branches
 
 stop_review:
   stage: deploy
@@ -56,5 +55,3 @@ stop_review:
     action: stop
   tags:
     - shell
-  only:
-    - branches
