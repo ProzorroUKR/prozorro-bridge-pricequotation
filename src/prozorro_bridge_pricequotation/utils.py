@@ -1,5 +1,4 @@
 from aiohttp import ClientSession
-
 from journal_msg_ids import TENDER_SWITCHED, TENDER_NOT_SWITCHED
 from settings import LOGGER, HEADERS, CDB_BASE_URL
 

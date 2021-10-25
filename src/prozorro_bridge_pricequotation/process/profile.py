@@ -1,8 +1,7 @@
 from aiohttp import ClientSession
 import asyncio
 import json
-
-from journal_msg_ids import TENDER_EXCEPTION
+from journal_msg_ids import TENDER_EXCEPTION, PROFILE_TO_SYNC, PROFILE_EXISTS
 from settings import LOGGER, CATALOG_BASE_URL, ERROR_INTERVAL, HEADERS
 from utils import journal_context, decline_resource
 
@@ -20,11 +19,15 @@ async def _get_tender_profile(tender: dict, session: ClientSession) -> dict or N
         raise
     profile_id = tender.get("profile")
     response = await session.get(f"{CATALOG_BASE_URL}/profiles/{profile_id}", headers=HEADERS)
-    if response.status != 200:
+    if response.status == 404:
+        LOGGER.error("Pofile {} not found in catalouges.".format(profile_id))
+        reason = u"Обраний профіль не існує в системі Prozorro.Market"
+        await decline_resource(tender_id, reason, session)
+    elif response.status != 200:
         LOGGER.info(
-            f"Profile {profile_id} not found in catalouges.",
+            f"Fail to profile existance {profile_id}.",
             extra=journal_context(
-                {"MESSAGE_ID": DATABRIDGE_CONTRACT_TO_SYNC},
+                {"MESSAGE_ID": PROFILE_TO_SYNC},
                 {"PROFILE_ID": profile_id, "TENDER_ID": tender_id},
             ),
         )
@@ -33,7 +36,7 @@ async def _get_tender_profile(tender: dict, session: ClientSession) -> dict or N
         LOGGER.info(
             f"Profile exists {profile_id}",
             extra=journal_context(
-                {"MESSAGE_ID": DATABRIDGE_CONTRACT_EXISTS},
+                {"MESSAGE_ID": PROFILE_EXISTS},
                 {"TENDER_ID": tender_id, "PROFILE_ID": profile_id},
             ),
         )

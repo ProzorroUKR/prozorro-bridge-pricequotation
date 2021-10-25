@@ -33,7 +33,7 @@ async def find_recursive_agreements_by_classification_id(classification_id: str,
 
 
 async def _get_tender_shortlisted_firms(tender: dict, profile: dict, session: ClientSession) -> list or None:
-    tender_id = tender["id"]
+    tender_id = tender["data"]["id"]
     classification_id = profile.get("data", {}).get("classification", {}).get("id")
     additional_classifications = profile.get("data", {}).get("additionalClassifications", [])
     additional_classifications_ids = []

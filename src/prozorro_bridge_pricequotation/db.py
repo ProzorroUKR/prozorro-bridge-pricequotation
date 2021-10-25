@@ -5,7 +5,7 @@ from typing import Callable
 
 from journal_msg_ids import MONGODB_EXCEPTION
 from settings import (
-    MONGODB_CONTRACTS_COLLECTION,
+    MONGODB_PRICEQUOTATION_COLLECTION,
     MONGODB_DATABASE,
     MONGODB_URL,
     LOGGER,
@@ -31,7 +31,7 @@ class Db:
     def __init__(self):
         self.client = AsyncIOMotorClient(MONGODB_URL)
         self.db = getattr(self.client, MONGODB_DATABASE)
-        self.collection = getattr(self.db, MONGODB_CONTRACTS_COLLECTION)
+        self.collection = getattr(self.db, MONGODB_PRICEQUOTATION_COLLECTION)
 
     @retry_decorator(log_message="Get item from contracts")
     async def get(self, key: str) -> dict:
