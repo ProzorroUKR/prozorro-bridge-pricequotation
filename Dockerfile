@@ -4,8 +4,6 @@ RUN apt-get update && apt-get install -y git
 WORKDIR /app
 ADD requirements.txt /app/
 RUN pip install --upgrade pip && pip install -r requirements.txt
-RUN pip install -e .
-RUN apt-get clean
 COPY ./src /app
 
 CMD ["python", "-m", "prozorro_bridge_pricequotation.main"]
