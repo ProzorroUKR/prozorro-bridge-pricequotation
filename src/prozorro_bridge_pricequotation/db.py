@@ -3,8 +3,8 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.errors import PyMongoError
 from typing import Callable
 
-from journal_msg_ids import MONGODB_EXCEPTION
-from settings import (
+from prozorro_bridge_pricequotation.journal_msg_ids import MONGODB_EXCEPTION
+from prozorro_bridge_pricequotation.settings import (
     MONGODB_PRICEQUOTATION_COLLECTION,
     MONGODB_DATABASE,
     MONGODB_URL,
@@ -33,11 +33,11 @@ class Db:
         self.db = getattr(self.client, MONGODB_DATABASE)
         self.collection = getattr(self.db, MONGODB_PRICEQUOTATION_COLLECTION)
 
-    @retry_decorator(log_message="Get item from contracts")
+    @retry_decorator(log_message="Get item from tenders")
     async def get(self, key: str) -> dict:
         return await self.collection.find_one({"_id": key})
 
-    @retry_decorator(log_message="Put item in contracts")
+    @retry_decorator(log_message="Put item in tenders")
     async def put(self, key: str, value) -> None:
         await self.collection.update_one(
             {"_id": key},
@@ -45,8 +45,8 @@ class Db:
             upsert=True
         )
 
-    @retry_decorator(log_message="Exists in contracts")
-    async def has(self, key: str) -> bool:
+    @retry_decorator(log_message="Exists in tenders")
+    async def has_tender(self, key: str) -> bool:
         value = await self.collection.find_one({"_id": key})
         return value is not None
 

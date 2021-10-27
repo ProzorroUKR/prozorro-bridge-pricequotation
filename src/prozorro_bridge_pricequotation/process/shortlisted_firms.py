@@ -2,9 +2,9 @@ from aiohttp import ClientSession
 import asyncio
 import json
 
-from journal_msg_ids import TENDER_EXCEPTION
-from settings import LOGGER, ERROR_INTERVAL, CDB_BASE_URL, HEADERS
-from utils import journal_context, decline_resource
+from prozorro_bridge_pricequotation.journal_msg_ids import TENDER_EXCEPTION
+from prozorro_bridge_pricequotation.settings import LOGGER, ERROR_INTERVAL, CDB_BASE_URL, HEADERS
+from prozorro_bridge_pricequotation.utils import journal_context, decline_resource
 
 
 async def find_agreements_by_classification_id(classification_id: str, additional_classifications_ids: list, session: ClientSession) -> dict or None:

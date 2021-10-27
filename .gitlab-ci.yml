@@ -55,3 +55,13 @@ stop_review:
     action: stop
   tags:
     - shell
+
+#test:
+#  image: python:3.8
+#  before_script:
+#    - pip install -r requirements.txt
+#    - pip install -e .
+#  script:
+#    - coverage run -m pytest tests/
+#    - coverage report
+#  coverage: '/TOTAL.+ ([0-9]{1,3}%)/'

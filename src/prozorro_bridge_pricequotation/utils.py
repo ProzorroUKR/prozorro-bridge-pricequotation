@@ -1,6 +1,6 @@
 from aiohttp import ClientSession
-from journal_msg_ids import TENDER_SWITCHED, TENDER_NOT_SWITCHED
-from settings import LOGGER, HEADERS, CDB_BASE_URL
+from prozorro_bridge_pricequotation.journal_msg_ids import TENDER_SWITCHED, TENDER_NOT_SWITCHED
+from prozorro_bridge_pricequotation.settings import LOGGER, HEADERS, CDB_BASE_URL
 
 
 def journal_context(record: dict = None, params: dict = None) -> dict:
