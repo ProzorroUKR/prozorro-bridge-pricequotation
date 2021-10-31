@@ -32,11 +32,9 @@ async def decline_resource(tender_id: str, reason: str,  session: ClientSession)
                         {"MESSAGE_ID": TENDER_SWITCHED},
                         params={"TENDER_ID": tender_id, "STATUS": status})
                     )
-        raise
     else:
         LOGGER.info("Not switch tender %s to `%s` with reason '%s'" % (tender_id, status, reason),
                     extra=journal_context(
                         {"MESSAGE_ID": TENDER_NOT_SWITCHED},
                         params={"TENDER_ID": tender_id, "STATUS": status})
                     )
-        raise

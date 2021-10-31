@@ -1,7 +1,5 @@
 from aiohttp import ClientSession
-import asyncio
 import json
-
 from prozorro_bridge_pricequotation.journal_msg_ids import TENDER_EXCEPTION
 from prozorro_bridge_pricequotation.settings import LOGGER, ERROR_INTERVAL, CDB_BASE_URL, HEADERS
 from prozorro_bridge_pricequotation.utils import journal_context, decline_resource
@@ -16,7 +14,7 @@ async def find_agreements_by_classification_id(classification_id: str, additiona
     if response.status == 200:
         resource_items_list = json.loads(await response.text())
         return resource_items_list.get("data", {})
-    raise
+    return
 
 
 async def find_recursive_agreements_by_classification_id(classification_id: str, additional_classifications_ids: list, session: ClientSession) -> dict or None:
@@ -33,7 +31,7 @@ async def find_recursive_agreements_by_classification_id(classification_id: str,
 
 
 async def _get_tender_shortlisted_firms(tender: dict, profile: dict, session: ClientSession) -> list or None:
-    tender_id = tender["data"]["id"]
+    tender_id = tender["id"]
     classification_id = profile.get("data", {}).get("classification", {}).get("id")
     additional_classifications = profile.get("data", {}).get("additionalClassifications", [])
     additional_classifications_ids = []
@@ -50,16 +48,18 @@ async def _get_tender_shortlisted_firms(tender: dict, profile: dict, session: Cl
         )
         reason = u"Для обраного профілю немає активних реєстрів"
         await decline_resource(tender_id, reason, session)
+        return
 
-    shortlisted_firms = {}
+    shortlisted_firms = []
 
     for agreement in agreements:
         for contract in agreement.get("contracts"):
-            if contract.status == "active":
-                identifier_id = contract.get("suppliers", [])[0].get("identifier").get("id")
-                shortlisted_firms[identifier_id] = contract.suppliers[0]
+            if contract.get("status") == "active":
+                suppliers = contract.get("suppliers", [])
+                if suppliers:
+                    shortlisted_firms.append(contract.get("suppliers")[0])
 
-    shortlisted_firms = shortlisted_firms.values()
+    shortlisted_firms = shortlisted_firms
 
     if not shortlisted_firms:
         LOGGER.error(
@@ -67,17 +67,17 @@ async def _get_tender_shortlisted_firms(tender: dict, profile: dict, session: Cl
         )
         reason = u"В обраних реєстрах немає активних постачальників"
         await decline_resource(tender_id, reason, session)
+        return
     return shortlisted_firms
 
 
 async def get_tender_shortlisted_firms(tender: dict, profile: dict, session: ClientSession) -> list or None:
-    while True:
-        try:
-            return await _get_tender_shortlisted_firms(tender, profile, session)
-        except Exception as e:
-            LOGGER.warn(
-                "Fail to handle tender shortlisted_firms",
-                extra=journal_context({"MESSAGE_ID": TENDER_EXCEPTION})
-            )
-            LOGGER.exception(e)
-            await asyncio.sleep(ERROR_INTERVAL)
+    try:
+        return await _get_tender_shortlisted_firms(tender, profile, session)
+    except Exception as e:
+        LOGGER.warn(
+            "Fail to handle tender shortlisted_firms",
+            extra=journal_context({"MESSAGE_ID": TENDER_EXCEPTION})
+        )
+        LOGGER.exception(e)
+        return

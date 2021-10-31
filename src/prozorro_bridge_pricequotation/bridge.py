@@ -48,8 +48,10 @@ async def process_listing(session: ClientSession, tender: dict) -> None:
         return None
     tender = await get_tender(tender["id"], session)
     profile = await get_tender_profile(tender, session)
+    if profile is None:
+        return None
     shortlisted_firms = await get_tender_shortlisted_firms(tender, profile, session)
-    items = await get_tender_items(tender, session)
+    items = await get_tender_items(tender, profile)
 
     status = "active.tendering"
     data = {
@@ -60,5 +62,10 @@ async def process_listing(session: ClientSession, tender: dict) -> None:
             "status": status
         }
     }
-    await patch_tender(tender["id"], data, session)
+    is_patch = await patch_tender(tender["id"], data, session)
+    if is_patch:
+        return
+    LOGGER.warn(
+
+    )
 

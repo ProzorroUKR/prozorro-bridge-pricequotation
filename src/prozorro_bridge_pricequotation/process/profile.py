@@ -16,13 +16,14 @@ async def _get_tender_profile(tender: dict, session: ClientSession) -> dict or N
                 {"TENDER_ID": tender["id"]}
             )
         )
-        raise
+        return
     profile_id = tender.get("profile")
     response = await session.get(f"{CATALOG_BASE_URL}/profiles/{profile_id}", headers=HEADERS)
     if response.status == 404:
         LOGGER.error("Pofile {} not found in catalouges.".format(profile_id))
         reason = u"Обраний профіль не існує в системі Prozorro.Market"
         await decline_resource(tender_id, reason, session)
+        return
     elif response.status != 200:
         LOGGER.info(
             f"Fail to profile existance {profile_id}.",
@@ -31,7 +32,7 @@ async def _get_tender_profile(tender: dict, session: ClientSession) -> dict or N
                 {"PROFILE_ID": profile_id, "TENDER_ID": tender_id},
             ),
         )
-        raise
+        return
     else:
         LOGGER.info(
             f"Profile exists {profile_id}",
@@ -42,7 +43,7 @@ async def _get_tender_profile(tender: dict, session: ClientSession) -> dict or N
         )
 
         profile = json.loads(await response.text())
-        profile_status = profile.get("data").get("status")
+        profile_status = profile.get("data", {}).get("status")
 
         if profile_status == "general":
             LOGGER.error("Profile {} status '{}' is not available for publication, tender {}".format(profile_id,
@@ -50,6 +51,7 @@ async def _get_tender_profile(tender: dict, session: ClientSession) -> dict or N
                                                                                                      tender_id))
             reason = u"Обраний профіль (загальний) недоступний для публікації закупівлі \"Запит ціни пропозиції\" в Prozorro.Market"
             await decline_resource(tender_id, reason, session)
+            return
 
         if profile_status != "active":
             LOGGER.error("Profile {} status '{}' not equal 'active', tender {}".format(profile_id,
@@ -57,18 +59,18 @@ async def _get_tender_profile(tender: dict, session: ClientSession) -> dict or N
                                                                                        tender_id))
             reason = u"Обраний профіль неактивний в системі Prozorro.Market"
             await decline_resource(tender_id, reason, session)
+            return
 
         return profile
 
 
 async def get_tender_profile(tender: dict, session: ClientSession) -> dict or None:
-    while True:
-        try:
-            return await _get_tender_profile(tender, session)
-        except Exception as e:
-            LOGGER.warn(
-                "Fail to handle tender profiles",
-                extra=journal_context({"MESSAGE_ID": TENDER_EXCEPTION})
-            )
-            LOGGER.exception(e)
-            await asyncio.sleep(ERROR_INTERVAL)
+    try:
+        return await _get_tender_profile(tender, session)
+    except Exception as e:
+        LOGGER.warn(
+            "Fail to handle tender profiles",
+            extra=journal_context({"MESSAGE_ID": TENDER_EXCEPTION})
+        )
+        LOGGER.exception(e)
+        return
