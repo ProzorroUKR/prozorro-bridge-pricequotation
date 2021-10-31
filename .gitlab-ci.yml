@@ -20,8 +20,6 @@ build:
 
 review:
   stage: deploy
-  dependencies:
-    - build
   tags:
     - shell
   environment:
