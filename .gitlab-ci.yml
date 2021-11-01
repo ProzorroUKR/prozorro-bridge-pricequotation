@@ -17,7 +17,6 @@ test:
     - coverage run -m pytest tests/
     - coverage report
   coverage: '/TOTAL.+ ([0-9]{1,3}%)/'
-  when: manual
 
 build:
   image: docker:git
@@ -68,6 +67,7 @@ review:
           --wait
   only:
     - branches
+    - tags
   except:
     - master
   when: manual
@@ -84,6 +84,7 @@ stop_review:
     - shell
   only:
     - branches
+    - tags
   except:
     - master
   when: manual
