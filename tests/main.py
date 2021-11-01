@@ -4,11 +4,40 @@ import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 from prozorro_bridge_pricequotation.bridge import (
     get_tender,
+    process_listing,
 )
 from prozorro_bridge_pricequotation.process.profile import get_tender_profile
 from prozorro_bridge_pricequotation.process.shortlisted_firms import get_tender_shortlisted_firms
 from prozorro_bridge_pricequotation.process.items import get_tender_items
 from base import TEST_TENDER, TEST_PROFILE, TEST_AGREEMENT
+
+
+@pytest.mark.asyncio
+@patch("prozorro_bridge_pricequotation.bridge.LOGGER")
+async def test_process_listing(mocked_logger):
+    tender_data = copy.deepcopy(TEST_TENDER)
+    profile_data = copy.deepcopy(TEST_PROFILE)
+    agreement_data = copy.deepcopy(TEST_AGREEMENT)
+
+    db_mock = AsyncMock()
+    db_mock.has_tender = AsyncMock(return_value=False)
+
+    session_mock = AsyncMock()
+    session_mock.get = AsyncMock(
+        side_effect=[
+            MagicMock(status=200, text=AsyncMock(return_value=json.dumps({"data": tender_data}))),
+            MagicMock(status=200, text=AsyncMock(return_value=json.dumps(profile_data))),
+            MagicMock(status=200, text=AsyncMock(return_value=json.dumps(agreement_data))),
+        ]
+    )
+    session_mock.patch = AsyncMock(
+        side_effect=[
+            MagicMock(status=200),
+        ]
+    )
+    with patch("prozorro_bridge_pricequotation.bridge.cache_db", AsyncMock()) as mocked_sleep:
+        await process_listing(session_mock, tender_data["data"])
+    assert session_mock.post.await_count == 0
 
 
 @pytest.mark.asyncio

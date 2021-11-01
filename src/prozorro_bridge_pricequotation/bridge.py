@@ -7,7 +7,11 @@ from prozorro_bridge_pricequotation.process.shortlisted_firms import get_tender_
 from prozorro_bridge_pricequotation.settings import HEADERS, CDB_BASE_URL, LOGGER, ERROR_INTERVAL
 from prozorro_bridge_pricequotation.utils import patch_tender, journal_context
 from prozorro_bridge_pricequotation.db import Db
-from prozorro_bridge_pricequotation.journal_msg_ids import TENDER_EXCEPTION, DATABRIDGE_SKIP_TENDER
+from prozorro_bridge_pricequotation.journal_msg_ids import (
+    TENDER_EXCEPTION,
+    DATABRIDGE_SKIP_TENDER,
+    TENDER_PATCHED,
+)
 
 cache_db = Db()
 
@@ -64,8 +68,21 @@ async def process_listing(session: ClientSession, tender: dict) -> None:
     }
     is_patch = await patch_tender(tender["id"], data, session)
     if is_patch:
+        LOGGER.info(
+            f"Successfully patch tender {tender['id']}",
+            extra=journal_context(
+                {"MESSAGE_ID": TENDER_PATCHED},
+                {"TENDER_ID": tender["id"]},
+            ),
+        )
         return
-    LOGGER.warn(
-
+    LOGGER.info(
+        f"Unsuccessful patch tender {tender['id']}",
+        extra=journal_context(
+            {"MESSAGE_ID": TENDER_EXCEPTION},
+            {"TENDER_ID": tender["id"]},
+        ),
     )
+    return
+
 
