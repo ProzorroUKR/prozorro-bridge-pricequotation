@@ -50,7 +50,7 @@ review:
   variables:
     API_TAG: "latest"
     TAG: $CI_COMMIT_REF_SLUG
-    API_HOST: http://api.${CI_COMMIT_REF_SLUG}.$K8S_DOMAIN
+    API_HOST: http://api.${CI_COMMIT_REF_SLUG}.${K8S_DOMAIN}
   script:
     - helm3 repo add prozorro $REPO_URL
     - helm3 repo update
