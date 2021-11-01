@@ -67,6 +67,7 @@ review:
           --wait
   only:
     - branches
+    - tags
   except:
     - master
   when: manual
@@ -83,6 +84,7 @@ stop_review:
     - shell
   only:
     - branches
+    - tags
   except:
     - master
   when: manual
