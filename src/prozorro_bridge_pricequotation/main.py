@@ -1,7 +1,7 @@
 from aiohttp import ClientSession
 import asyncio
 from prozorro_crawler.main import main
-from bridge import process_listing
+from prozorro_bridge_pricequotation.bridge import process_listing
 
 
 async def data_handler(session: ClientSession, items: list) -> None:
