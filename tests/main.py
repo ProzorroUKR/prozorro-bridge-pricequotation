@@ -9,7 +9,25 @@ from prozorro_bridge_pricequotation.bridge import (
 from prozorro_bridge_pricequotation.process.profile import get_tender_profile
 from prozorro_bridge_pricequotation.process.shortlisted_firms import get_tender_shortlisted_firms
 from prozorro_bridge_pricequotation.process.items import get_tender_items
+from prozorro_bridge_pricequotation.utils import check_tender
 from base import TEST_TENDER, TEST_PROFILE, TEST_AGREEMENT
+
+
+@pytest.mark.asyncio
+@patch("prozorro_bridge_pricequotation.bridge.LOGGER")
+async def test_check_tender_is_not_valid(mocked_logger):
+    tender_data = copy.deepcopy(TEST_TENDER)
+    tender_data["data"]["procurementMethodType"] = "test"
+    is_check = check_tender(tender_data["data"])
+    assert is_check is False
+
+
+@pytest.mark.asyncio
+@patch("prozorro_bridge_pricequotation.bridge.LOGGER")
+async def test_check_tender_is_valid(mocked_logger):
+    tender_data = copy.deepcopy(TEST_TENDER)
+    is_check = check_tender(tender_data["data"])
+    assert is_check is True
 
 
 @pytest.mark.asyncio
