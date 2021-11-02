@@ -11,4 +11,4 @@ coverage==5.3
 pytest==6.1.2
 pytest-asyncio==0.15.1
 
-git+git://github.com/ProzorroUKR/prozorro_crawler.git@1.1.5#egg=prozorro_crawler
+git+https://github.com/ProzorroUKR/prozorro_crawler.git@1.1.5#egg=prozorro_crawler
