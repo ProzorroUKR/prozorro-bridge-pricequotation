@@ -20,7 +20,7 @@ async def _get_tender_profile(tender: dict, session: ClientSession) -> dict or N
     profile_id = tender.get("profile")
     response = await session.get(f"{CATALOG_BASE_URL}/profiles/{profile_id}")
     if response.status == 404:
-        LOGGER.error("Profile {} not found in catalouges.".format(profile_id))
+        LOGGER.error("Profile {} not found in catalouges {}.".format(profile_id, f"{CATALOG_BASE_URL}/profiles/{profile_id}"))
         reason = u"Обраний профіль не існує в системі Prozorro.Market"
         await decline_resource(tender_id, reason, session)
         return
