@@ -16,7 +16,7 @@ CATALOG_BASE_URL = f"{CATALOG_API_HOST}/api/0"
 
 API_OPT_FIELDS = os.environ.get("API_OPT_FIELDS", "status,procurementMethodType")
 
-API_TOKEN = os.environ.get("API_TOKEN", "pqbot")
+API_TOKEN = os.environ.get("API_TOKEN", "pqBot")
 USER_AGENT = os.environ.get("USER_AGENT", "bot.priceQuotation")
 
 HEADERS = {
