@@ -45,7 +45,7 @@ review:
     action: start
     url: http://api.${CI_COMMIT_REF_SLUG}.${K8S_DOMAIN}/api/2.5/tenders
     on_stop: stop_review
-    auto_stop_in: 1 month
+    auto_stop_in: 5 day
   variables:
     API_TAG: "latest"
     TAG: $CI_COMMIT_REF_SLUG
@@ -60,6 +60,7 @@ review:
           --set deployBridges=false
           --set deployTasks=false
           --set deployRedis=false
+          --set deployChronograph=false
           --wait
     - helm3 --debug upgrade ${CI_COMMIT_REF_SLUG}-pq --install prozorro/prozorro-bridge-pricequotation --namespace dev-prozorro
           --set pricequotation.container.environment.CDB_PUBLIC_API_HOST=$API_HOST
