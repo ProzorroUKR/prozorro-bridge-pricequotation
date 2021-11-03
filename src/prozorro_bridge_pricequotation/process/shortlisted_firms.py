@@ -10,7 +10,7 @@ async def find_agreements_by_classification_id(classification_id: str, additiona
     params = {}
     if additional_classifications_ids:
         params["additional_classifications"] = ",".join(additional_classifications_ids)
-    response = await session.get(url, headers=HEADERS, params=params)
+    response = await session.get(url, params=params)
     if response.status == 200:
         resource_items_list = json.loads(await response.text())
         return resource_items_list.get("data", {})

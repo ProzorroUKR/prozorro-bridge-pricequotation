@@ -1,5 +1,5 @@
 from aiohttp import ClientSession
-from prozorro_bridge_pricequotation.journal_msg_ids import TENDER_SWITCHED, TENDER_NOT_SWITCHED
+from prozorro_bridge_pricequotation.journal_msg_ids import TENDER_SWITCHED, TENDER_NOT_SWITCHED, TENDER_INFO
 from prozorro_bridge_pricequotation.settings import LOGGER, HEADERS, CDB_BASE_URL
 
 
@@ -38,3 +38,16 @@ async def decline_resource(tender_id: str, reason: str,  session: ClientSession)
                         {"MESSAGE_ID": TENDER_NOT_SWITCHED},
                         params={"TENDER_ID": tender_id, "STATUS": status})
                     )
+
+
+def check_tender(tender: dict) -> bool:
+    if tender["procurementMethodType"] == "priceQuotation" and tender["status"] == "draft.publishing":
+        return True
+    LOGGER.info(
+        f"Skipping tender {tender['id']} in status {tender['status']} and procurementMethodType {tender['procurementMethodType']}",
+        extra=journal_context(
+            {"MESSAGE_ID": TENDER_INFO},
+            params={"TENDER_ID": tender["id"]}
+        ),
+    )
+    return False
