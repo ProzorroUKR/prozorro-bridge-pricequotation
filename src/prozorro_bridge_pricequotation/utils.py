@@ -24,7 +24,7 @@ async def patch_tender(tender_id: str, patch_data: dict, session: ClientSession)
 
 async def decline_resource(tender_id: str, reason: str,  session: ClientSession) -> dict or None:
     status = "draft.unsuccessful"
-    patch_data = {"data": {"status": status, "unsuccessfulReason": [reason]}}
+    patch_data = {"status": status, "unsuccessfulReason": [reason]}
     is_patch = await patch_tender(tender_id, patch_data, session)
     if is_patch:
         LOGGER.info("Switch tender %s to `%s` with reason '%s'" % (tender_id, status, reason),
