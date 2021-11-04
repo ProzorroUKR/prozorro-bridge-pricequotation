@@ -50,7 +50,8 @@ async def get_tender(tender_id: str, session: ClientSession) -> dict:
 async def process_listing(session: ClientSession, tender: dict) -> None:
     if not check_tender(tender):
         return None
-    tender = await get_tender(tender["id"], session)
+    tender_id = tender["id"]
+    tender = await get_tender(tender_id, session)
 
     profile = await get_tender_profile(tender, session)
     if profile is None:
@@ -67,7 +68,7 @@ async def process_listing(session: ClientSession, tender: dict) -> None:
     criteria = await get_criteria(profile.get("data", {}).get("criteria", []))
 
     status = "active.tendering"
-    data = {
+    patch_data = {
         "data": {
             "criteria": criteria,
             "items": items,
@@ -75,21 +76,21 @@ async def process_listing(session: ClientSession, tender: dict) -> None:
             "status": status
         }
     }
-    is_patch = await patch_tender(tender["id"], data, session)
+    is_patch = await patch_tender(tender_id, patch_data, session)
     if is_patch:
         LOGGER.info(
-            f"Successfully patch tender {tender['id']}",
+            f"Successfully patch tender {tender_id}",
             extra=journal_context(
                 {"MESSAGE_ID": TENDER_PATCHED},
-                {"TENDER_ID": tender["id"]},
+                params={"TENDER_ID": tender_id},
             ),
         )
         return
     LOGGER.info(
-        f"Unsuccessful patch tender {tender['id']}",
+        f"Unsuccessful patch tender {tender_id}",
         extra=journal_context(
             {"MESSAGE_ID": TENDER_EXCEPTION},
-            {"TENDER_ID": tender["id"]},
+            params={"TENDER_ID": tender_id},
         ),
     )
     return

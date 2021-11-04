@@ -27,13 +27,13 @@ async def decline_resource(tender_id: str, reason: str,  session: ClientSession)
     patch_data = {"data": {"status": status, "unsuccessfulReason": [reason]}}
     is_patch = await patch_tender(tender_id, patch_data, session)
     if is_patch:
-        LOGGER.info("Switch tender %s to `%s` with reason '%s'" % (tender_id, status, reason),
+        LOGGER.info(f"Switch tender {tender_id} to {status} with reason {reason}",
                     extra=journal_context(
                         {"MESSAGE_ID": TENDER_SWITCHED},
                         params={"TENDER_ID": tender_id, "STATUS": status})
                     )
     else:
-        LOGGER.info("Not switch tender %s to `%s` with reason '%s'" % (tender_id, status, reason),
+        LOGGER.info(f"Not switch tender {tender_id} to {status} with reason {reason}",
                     extra=journal_context(
                         {"MESSAGE_ID": TENDER_NOT_SWITCHED},
                         params={"TENDER_ID": tender_id, "STATUS": status})
@@ -41,13 +41,16 @@ async def decline_resource(tender_id: str, reason: str,  session: ClientSession)
 
 
 def check_tender(tender: dict) -> bool:
-    if tender["procurementMethodType"] == "priceQuotation" and tender["status"] == "draft.publishing":
+    tender_procurementMethodType = tender["procurementMethodType"]
+    tender_status = tender["status"]
+    tender_id = tender["id"]
+    if tender_procurementMethodType == "priceQuotation" and tender_status == "draft.publishing":
         return True
     LOGGER.info(
-        f"Skipping tender {tender['id']} in status {tender['status']} and procurementMethodType {tender['procurementMethodType']}",
+        f"Skipping tender {tender_id} in status {tender_status} and procurementMethodType {tender_procurementMethodType}",
         extra=journal_context(
             {"MESSAGE_ID": TENDER_INFO},
-            params={"TENDER_ID": tender["id"]}
+            params={"TENDER_ID": tender_id}
         ),
     )
     return False

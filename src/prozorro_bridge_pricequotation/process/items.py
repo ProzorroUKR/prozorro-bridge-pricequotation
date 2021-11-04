@@ -1,6 +1,3 @@
-requirement_keys = ("minValue", "maxValue", "expectedValue")
-
-
 async def get_tender_items(tender: dict, profile: dict) -> list:
     items = []
 

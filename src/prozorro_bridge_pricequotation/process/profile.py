@@ -1,5 +1,4 @@
 from aiohttp import ClientSession
-import asyncio
 import json
 from prozorro_bridge_pricequotation.journal_msg_ids import TENDER_EXCEPTION, PROFILE_TO_SYNC, PROFILE_EXISTS
 from prozorro_bridge_pricequotation.settings import LOGGER, CATALOG_BASE_URL, ERROR_INTERVAL, HEADERS
@@ -13,14 +12,14 @@ async def _get_tender_profile(tender: dict, session: ClientSession) -> dict or N
             f"No profile found in tender {tender_id}",
             extra=journal_context(
                 {"MESSAGE_ID": TENDER_EXCEPTION},
-                {"TENDER_ID": tender["id"]}
+                params={"TENDER_ID": tender_id}
             )
         )
         return
     profile_id = tender.get("profile")
     response = await session.get(f"{CATALOG_BASE_URL}/profiles/{profile_id}")
     if response.status == 404:
-        LOGGER.error("Profile {} not found in catalouges.".format(profile_id))
+        LOGGER.error(f"Profile {profile_id} not found in catalouges.")
         reason = u"Обраний профіль не існує в системі Prozorro.Market"
         await decline_resource(tender_id, reason, session)
         return
@@ -46,17 +45,13 @@ async def _get_tender_profile(tender: dict, session: ClientSession) -> dict or N
         profile_status = profile.get("data", {}).get("status")
 
         if profile_status == "general":
-            LOGGER.error("Profile {} status '{}' is not available for publication, tender {}".format(profile_id,
-                                                                                                     profile_status,
-                                                                                                     tender_id))
+            LOGGER.error(f"Profile {profile_id} status '{profile_status}' is not available for publication, tender {tender_id}")
             reason = u"Обраний профіль (загальний) недоступний для публікації закупівлі \"Запит ціни пропозиції\" в Prozorro.Market"
             await decline_resource(tender_id, reason, session)
             return
 
         if profile_status != "active":
-            LOGGER.error("Profile {} status '{}' not equal 'active', tender {}".format(profile_id,
-                                                                                       profile_status,
-                                                                                       tender_id))
+            LOGGER.error(f"Profile {profile_id} status '{profile_status}' not equal 'active', tender {tender_id}")
             reason = u"Обраний профіль неактивний в системі Prozorro.Market"
             await decline_resource(tender_id, reason, session)
             return
@@ -70,7 +65,10 @@ async def get_tender_profile(tender: dict, session: ClientSession) -> dict or No
     except Exception as e:
         LOGGER.warn(
             "Fail to handle tender profiles",
-            extra=journal_context({"MESSAGE_ID": TENDER_EXCEPTION})
+            extra=journal_context(
+                {"MESSAGE_ID": TENDER_EXCEPTION},
+                params={"TENDER_ID": tender["id"]}
+            )
         )
         LOGGER.exception(e)
         return

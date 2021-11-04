@@ -94,7 +94,10 @@ async def get_tender_shortlisted_firms(tender: dict, profile: dict, session: Cli
     except Exception as e:
         LOGGER.warn(
             "Fail to handle tender shortlisted_firms",
-            extra=journal_context({"MESSAGE_ID": TENDER_EXCEPTION})
+            extra=journal_context(
+                {"MESSAGE_ID": TENDER_EXCEPTION},
+                params={"TENDER_ID": tender["id"]}
+            )
         )
         LOGGER.exception(e)
         return
