@@ -43,7 +43,7 @@ async def test_process_listing(mocked_logger):
     session_mock = AsyncMock()
     session_mock.get = AsyncMock(
         side_effect=[
-            MagicMock(status=200, text=AsyncMock(return_value=json.dumps({"data": tender_data}))),
+            MagicMock(status=200, text=AsyncMock(return_value=json.dumps(tender_data))),
             MagicMock(status=200, text=AsyncMock(return_value=json.dumps(profile_data))),
             MagicMock(status=200, text=AsyncMock(return_value=json.dumps(agreement_data))),
         ]
@@ -53,8 +53,14 @@ async def test_process_listing(mocked_logger):
             MagicMock(status=200),
         ]
     )
+
+    fid_data = {
+        "id": tender_data["data"]["id"],
+        "status": tender_data["data"]["status"],
+        "procurementMethodType": tender_data["data"]["procurementMethodType"]
+    }
     with patch("prozorro_bridge_pricequotation.bridge.cache_db", AsyncMock()) as mocked_sleep:
-        await process_listing(session_mock, tender_data["data"])
+        await process_listing(session_mock, fid_data)
     assert session_mock.post.await_count == 0
 
 
