@@ -15,7 +15,7 @@ def journal_context(record: dict = None, params: dict = None) -> dict:
 
 async def patch_tender(tender_id: str, patch_data: dict, session: ClientSession) -> bool:
     url = "{}/tenders/{}".format(CDB_BASE_URL, tender_id)
-    response = await session.patch(url, data=patch_data, headers=HEADERS)
+    response = await session.put(url, json=patch_data, headers=HEADERS)
     if response.status != 200:
         return False
     else:
@@ -24,7 +24,7 @@ async def patch_tender(tender_id: str, patch_data: dict, session: ClientSession)
 
 async def decline_resource(tender_id: str, reason: str,  session: ClientSession) -> dict or None:
     status = "draft.unsuccessful"
-    patch_data = {"status": status, "unsuccessfulReason": [reason]}
+    patch_data = {"data": {"status": status, "unsuccessfulReason": [reason]}}
     is_patch = await patch_tender(tender_id, patch_data, session)
     if is_patch:
         LOGGER.info("Switch tender %s to `%s` with reason '%s'" % (tender_id, status, reason),
