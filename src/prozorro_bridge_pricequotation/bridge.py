@@ -26,6 +26,13 @@ async def get_tender(tender_id: str, session: ClientSession) -> dict:
             data = await response.text()
             if response.status != 200:
                 raise ConnectionError(f"Error {data}")
+            LOGGER.warning(
+                f"Get tender {tender_id}",
+                extra=journal_context(
+                    {"MESSAGE_ID": TENDER_EXCEPTION},
+                    params={"TENDER_ID": tender_id}
+                )
+            )
             return json.loads(data)["data"]
         except Exception as e:
             LOGGER.warning(
