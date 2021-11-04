@@ -1,13 +1,12 @@
 import asyncio
-
 from aiohttp import ClientSession
 import json
-from prozorro_bridge_pricequotation.journal_msg_ids import TENDER_EXCEPTION
-from prozorro_bridge_pricequotation.settings import LOGGER, ERROR_INTERVAL, CDB_BASE_URL, HEADERS
+from prozorro_bridge_pricequotation.journal_msg_ids import TENDER_EXCEPTION, AGREEMENTS_EXISTS, AGREEMENTS_EXCEPTION
+from prozorro_bridge_pricequotation.settings import LOGGER, CDB_BASE_URL
 from prozorro_bridge_pricequotation.utils import journal_context, decline_resource
 
 
-async def find_agreements_by_classification_id(classification_id: str, additional_classifications_ids: list, session: ClientSession) -> dict or None:
+async def find_agreements_by_classification_id(classification_id: str, additional_classifications_ids: list, session: ClientSession, tender_id: str) -> dict or None:
     url = "{}/agreements_by_classification/{}".format(CDB_BASE_URL, classification_id)
     params = {}
     if additional_classifications_ids:
@@ -15,22 +14,37 @@ async def find_agreements_by_classification_id(classification_id: str, additiona
     response = await session.get(url, params=params)
     if response.status == 200:
         resource_items_list = json.loads(await response.text())
+        LOGGER.error(
+            f"Get agreements by classification {classification_id}",
+            extra=journal_context(
+                {"MESSAGE_ID": AGREEMENTS_EXISTS},
+                params={"TENDER_ID": tender_id}
+            )
+        )
         return resource_items_list.get("data", {})
+    LOGGER.error(
+        f"Fail to get agreements by classification {classification_id}",
+        extra=journal_context(
+            {"MESSAGE_ID": AGREEMENTS_EXCEPTION},
+            params={"TENDER_ID": tender_id}
+        )
+    )
     return
 
 
-async def find_recursive_agreements_by_classification_id(classification_id: str, additional_classifications_ids: list, session: ClientSession) -> dict or None:
+async def find_recursive_agreements_by_classification_id(classification_id: str, additional_classifications_ids: list, session: ClientSession, tender_id: str) -> dict or None:
     if "-" in classification_id:
         classification_id = classification_id[:classification_id.find("-")]
     needed_level = 2
     while classification_id[needed_level] != '0':
-        agreements = await find_agreements_by_classification_id(classification_id, additional_classifications_ids, session)
+        agreements = await find_agreements_by_classification_id(classification_id, additional_classifications_ids, session, tender_id)
         if agreements:
             return agreements
 
         pos = classification_id[1:].find('0')
         classification_id = classification_id[:pos] + '0' + classification_id[pos + 1:]
         await asyncio.sleep(1)
+    return
 
 
 async def _get_tender_shortlisted_firms(tender: dict, profile: dict, session: ClientSession) -> list or None:
@@ -43,7 +57,7 @@ async def _get_tender_shortlisted_firms(tender: dict, profile: dict, session: Cl
             additional_classifications_ids.append(i.get("id"))
         continue
 
-    agreements = await find_recursive_agreements_by_classification_id(classification_id, additional_classifications_ids, session)
+    agreements = await find_recursive_agreements_by_classification_id(classification_id, additional_classifications_ids, session, tender_id)
 
     if not agreements:
         LOGGER.error(
