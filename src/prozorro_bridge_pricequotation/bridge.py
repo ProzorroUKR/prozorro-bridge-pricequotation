@@ -43,11 +43,18 @@ async def process_listing(session: ClientSession, tender: dict) -> None:
     if not check_tender(tender):
         return None
     tender = await get_tender(tender["id"], session)
+
     profile = await get_tender_profile(tender, session)
     if profile is None:
         return None
+
     shortlisted_firms = await get_tender_shortlisted_firms(tender, profile, session)
+    if shortlisted_firms is None:
+        return None
+
     items = await get_tender_items(tender, profile)
+    if items is None:
+        return None
 
     status = "active.tendering"
     data = {
