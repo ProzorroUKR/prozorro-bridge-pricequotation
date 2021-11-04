@@ -15,7 +15,7 @@ def journal_context(record: dict = None, params: dict = None) -> dict:
 
 async def patch_tender(tender_id: str, patch_data: dict, session: ClientSession) -> bool:
     url = "{}/tenders/{}".format(CDB_BASE_URL, tender_id)
-    response = await session.put(url, json=patch_data, headers=HEADERS)
+    response = await session.patch(url, json=patch_data)
     if response.status != 200:
         return False
     else:
