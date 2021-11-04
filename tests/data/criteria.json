@@ -1,0 +1,70 @@
+{
+  "data": {
+    "title": "Багатофункціональний пристрій друку, моно, клас B",
+    "description": "Багатофункціональний пристрій друку, монохромний, A4, 15 000 стор/міс, 27 стор/хв, ADF/Duplex, USB/Ethernet/Wi-Fi",
+    "status": "active",
+    "unit": {
+      "code": "H87",
+      "name": "штуки"
+    },
+    "value": {
+      "amount": 250,
+      "currency": "UAH",
+      "valueAddedTaxIncluded": true
+    },
+    "relatedCategory": "33140000-866999-12345679",
+    "images": [],
+    "criteria": [
+      {
+        "id": "817174-0001",
+        "title": "Технологія друку з мобільних пристроїв",
+        "code": "OCDS-PRINT-FROM-MOBILE",
+        "description": "Чи підтримує пристрій технологію друку з мобільних пристроїв",
+        "requirementGroups": [
+          {
+            "id": "817174-0001-001",
+            "description": "Пристрій має підтримувати технологію друку з мобільних пристроїв",
+            "requirements": [
+              {
+                "id": "817174-0001-001-01",
+                "title": "Технологія друку з мобільних пристроїв",
+                "dataType": "boolean",
+                "description": "Підтримка технології друку з мобільних пристроїв",
+                "expectedValue": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "817174-0002",
+        "title": "Швидкість друку",
+        "code": "OCDS-PRINT-SPEED",
+        "description": "Швидкість друку сторінок за хвилину",
+        "requirementGroups": [
+          {
+            "id": "817174-0002-001",
+            "description": "Швидкість друку не менше 33 ст/хв.",
+            "requirements": [
+              {
+                "id": "817174-0002-001-01",
+                "title": "Швидкість друку",
+                "dataType": "integer",
+                "minValue": 33
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "classification": {
+      "id": "33140000-3",
+      "description": "Медичні матеріали",
+      "scheme": "ДК021"
+    },
+    "additionalClassifications": [],
+    "dateModified": "2021-10-28T16:43:33.966493+03:00",
+    "id": "768299-33140000-166989-12345678",
+    "owner": "12345678"
+  }
+}

@@ -2,6 +2,7 @@ import asyncio
 import json
 from aiohttp import ClientSession
 from prozorro_bridge_pricequotation.process.items import get_tender_items
+from prozorro_bridge_pricequotation.process.criteria import get_criteria
 from prozorro_bridge_pricequotation.process.profile import get_tender_profile
 from prozorro_bridge_pricequotation.process.shortlisted_firms import get_tender_shortlisted_firms
 from prozorro_bridge_pricequotation.settings import HEADERS, CDB_BASE_URL, LOGGER, ERROR_INTERVAL
@@ -14,7 +15,6 @@ from prozorro_bridge_pricequotation.journal_msg_ids import (
 
 cache_db = Db()
 
-requirement_keys = ("minValue", "maxValue", "expectedValue")
 
 async def check_cache(tender: dict) -> bool:
     return await cache_db.has_tender(tender["id"])
@@ -64,20 +64,12 @@ async def process_listing(session: ClientSession, tender: dict) -> None:
     if items is None:
         return None
 
-    for criterion in profile.get("data", {}).get("criteria"):
-        criterion.pop("code", None)
-        for rq_group in criterion.get("requirementGroups", []):
-            for rq in rq_group.get("requirements", []):
-                if rq.get("dataType") == 'string':
-                    continue
-                for key in requirement_keys:
-                    if key in rq:
-                        rq[key] = str(rq[key])
+    criteria = await get_criteria(profile.get("data", {}).get("criteria", []))
 
     status = "active.tendering"
     data = {
         "data": {
-            "criteria": profile.get("data", {}).get("criteria", []),
+            "criteria": criteria,
             "items": items,
             "shortlistedFirms": shortlisted_firms,
             "status": status

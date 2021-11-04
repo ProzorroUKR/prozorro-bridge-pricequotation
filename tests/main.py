@@ -237,6 +237,3 @@ async def test_get_tender(mocked_logger):
     assert mocked_sleep.await_count == 1
     assert session_mock.get.await_count == 2
     assert tender_data == tender
-
-
-

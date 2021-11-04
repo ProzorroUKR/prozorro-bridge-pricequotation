@@ -1,3 +1,5 @@
+import asyncio
+
 from aiohttp import ClientSession
 import json
 from prozorro_bridge_pricequotation.journal_msg_ids import TENDER_EXCEPTION
@@ -28,6 +30,7 @@ async def find_recursive_agreements_by_classification_id(classification_id: str,
 
         pos = classification_id[1:].find('0')
         classification_id = classification_id[:pos] + '0' + classification_id[pos + 1:]
+        await asyncio.sleep(1)
 
 
 async def _get_tender_shortlisted_firms(tender: dict, profile: dict, session: ClientSession) -> list or None:
