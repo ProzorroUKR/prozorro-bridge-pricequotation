@@ -91,7 +91,7 @@ async def test_get_shortlisted_firms_if_contract_is_active(mocked_logger):
         ]
     )
     with patch("prozorro_bridge_pricequotation.bridge.asyncio.sleep", AsyncMock()) as mocked_sleep:
-        shortlisted_firms = await get_tender_shortlisted_firms(tender_data["data"], session_mock, agreement_data["data"])
+        shortlisted_firms = await get_tender_shortlisted_firms(tender_data["data"], session_mock, [agreement_data["data"]])
     shortlisted_firms_test = []
     for agreement in agreement_data.get('data'):
         for contract in agreement.get("contracts"):

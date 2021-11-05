@@ -80,10 +80,10 @@ async def _get_tender_shortlisted_firms_by_agreement(tender: dict, session: Clie
     return shortlisted_firms
 
 
-async def get_tender_shortlisted_firms(tender: dict, session: ClientSession, agreements: list = None) -> list or None:
+async def get_tender_shortlisted_firms(tender: dict, session: ClientSession, agreements: list) -> list or None:
     try:
-        if agreements is not None:
-            return await _get_tender_shortlisted_firms_by_agreement(tender, session, agreements)
+        if not tender.get("agreement", {}).get("id"):
+            return await _get_tender_shortlisted_firms_by_agreement(tender, session, agreements[0])
         return await _get_tender_shortlisted_firms(tender, session)
     except Exception as e:
         LOGGER.warn(
