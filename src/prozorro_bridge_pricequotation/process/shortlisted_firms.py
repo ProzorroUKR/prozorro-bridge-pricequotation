@@ -1,74 +1,68 @@
-import asyncio
 from aiohttp import ClientSession
 import json
-from prozorro_bridge_pricequotation.journal_msg_ids import TENDER_EXCEPTION, AGREEMENTS_EXISTS, AGREEMENTS_EXCEPTION
+from prozorro_bridge_pricequotation.journal_msg_ids import TENDER_EXCEPTION, AGREEMENTS_EXCEPTION
 from prozorro_bridge_pricequotation.settings import LOGGER, CDB_BASE_URL
 from prozorro_bridge_pricequotation.utils import journal_context, decline_resource
 
 
-async def find_agreements_by_classification_id(classification_id: str, additional_classifications_ids: list, session: ClientSession, tender_id: str) -> dict or None:
-    url = "{}/agreements_by_classification/{}".format(CDB_BASE_URL, classification_id)
-    params = {}
-    if additional_classifications_ids:
-        params["additional_classifications"] = ",".join(additional_classifications_ids)
-    response = await session.get(url, params=params)
-    if response.status == 200:
-        resource_items_list = json.loads(await response.text())
+async def _get_tender_shortlisted_firms(tender: dict, session: ClientSession) -> list or None:
+    tender_id = tender["id"]
+    agreement_id = tender.get("agreement", {}).get("id")
+    if not agreement_id:
         LOGGER.error(
-            f"Get agreements by classification {classification_id}",
+            f"Agreement not found in tender {tender_id}",
             extra=journal_context(
-                {"MESSAGE_ID": AGREEMENTS_EXISTS},
+                {"MESSAGE_ID": AGREEMENTS_EXCEPTION},
                 params={"TENDER_ID": tender_id}
             )
         )
-        return resource_items_list.get("data", {})
-    LOGGER.error(
-        f"Fail to get agreements by classification {classification_id}",
-        extra=journal_context(
-            {"MESSAGE_ID": AGREEMENTS_EXCEPTION},
-            params={"TENDER_ID": tender_id}
-        )
-    )
-    return
-
-
-async def find_recursive_agreements_by_classification_id(classification_id: str, additional_classifications_ids: list, session: ClientSession, tender_id: str) -> dict or None:
-    if "-" in classification_id:
-        classification_id = classification_id[:classification_id.find("-")]
-    needed_level = 2
-    while classification_id[needed_level] != '0':
-        agreements = await find_agreements_by_classification_id(classification_id, additional_classifications_ids, session, tender_id)
-        if agreements:
-            return agreements
-
-        pos = classification_id[1:].find('0')
-        classification_id = classification_id[:pos] + '0' + classification_id[pos + 1:]
-        await asyncio.sleep(1)
-    return
-
-
-async def _get_tender_shortlisted_firms(tender: dict, profile: dict, session: ClientSession) -> list or None:
-    tender_id = tender["id"]
-    classification_id = profile.get("data", {}).get("classification", {}).get("id")
-    additional_classifications = profile.get("data", {}).get("additionalClassifications", [])
-    additional_classifications_ids = []
-    for i in additional_classifications:
-        if additional_classifications:
-            additional_classifications_ids.append(i.get("id"))
-        continue
-
-    agreements = await find_recursive_agreements_by_classification_id(classification_id, additional_classifications_ids, session, tender_id)
-
-    if not agreements:
-        LOGGER.error(
-            "There are no any active agreement for classification: {} or for levels higher".format(classification_id)
-        )
-        reason = u"Для обраного профілю немає активних реєстрів"
-        await decline_resource(tender_id, reason, session)
         return
+    response = await session.get(f"{CDB_BASE_URL}/agreements/{agreement_id}")
+    if response.status == 404:
+        LOGGER.error(
+            f"Agreement not found by agreement_id {agreement_id}",
+            extra=journal_context(
+                {"MESSAGE_ID": AGREEMENTS_EXCEPTION},
+                params={"TENDER_ID": tender_id, "AGREEMENT_ID": agreement_id}
+            )
+        )
+        return
+    elif response.status != 200:
+        LOGGER.error(
+            f"Fail to get agreement by agreement_id {agreement_id}",
+            extra=journal_context(
+                {"MESSAGE_ID": AGREEMENTS_EXCEPTION},
+                params={"TENDER_ID": tender_id, "AGREEMENT_ID": agreement_id}
+            )
+        )
+        return
+    else:
+        shortlisted_firms = []
+        agreements = json.loads(await response.text())
+        agreements_data = agreements.get("data", {})
+        for contract in agreements_data.get("contracts"):
+            if contract.get("status") == "active":
+                suppliers = contract.get("suppliers", [])
+                if suppliers:
+                    shortlisted_firms.append(contract.get("suppliers")[0])
 
+        if not shortlisted_firms:
+            LOGGER.error(
+                f"This agreement {agreement_id} doesn`t have qualified suppliers",
+                extra=journal_context(
+                    {"MESSAGE_ID": AGREEMENTS_EXCEPTION},
+                    params={"TENDER_ID": tender_id, "AGREEMENT_ID": agreement_id}
+                )
+            )
+            reason = u"В обраних реєстрах немає активних постачальників"
+            await decline_resource(tender_id, reason, session)
+            return
+    return shortlisted_firms
+
+
+async def _get_tender_shortlisted_firms_by_agreement(tender: dict, session: ClientSession, agreements: list) -> list or None:
+    tender_id = tender["id"]
     shortlisted_firms = []
-
     for agreement in agreements:
         for contract in agreement.get("contracts"):
             if contract.get("status") == "active":
@@ -76,11 +70,9 @@ async def _get_tender_shortlisted_firms(tender: dict, profile: dict, session: Cl
                 if suppliers:
                     shortlisted_firms.append(contract.get("suppliers")[0])
 
-    shortlisted_firms = shortlisted_firms
-
     if not shortlisted_firms:
         LOGGER.error(
-            "This category {} doesn`t have qualified suppliers".format(profile.get("data", {}).get("relatedCategory"))
+            f"This agreement {''} doesn`t have qualified suppliers",
         )
         reason = u"В обраних реєстрах немає активних постачальників"
         await decline_resource(tender_id, reason, session)
@@ -88,9 +80,11 @@ async def _get_tender_shortlisted_firms(tender: dict, profile: dict, session: Cl
     return shortlisted_firms
 
 
-async def get_tender_shortlisted_firms(tender: dict, profile: dict, session: ClientSession) -> list or None:
+async def get_tender_shortlisted_firms(tender: dict, session: ClientSession, agreements: list = None) -> list or None:
     try:
-        return await _get_tender_shortlisted_firms(tender, profile, session)
+        if agreements is not None:
+            return await _get_tender_shortlisted_firms_by_agreement(tender, session, agreements)
+        return await _get_tender_shortlisted_firms(tender, session)
     except Exception as e:
         LOGGER.warn(
             "Fail to handle tender shortlisted_firms",

@@ -1,0 +1,225 @@
+{
+  "data": {
+    "id": "563b94585e1b4f4bbadd9e7e4416ad93",
+    "agreementID": "UA-2021-11-04-000004-a",
+    "status": "active",
+    "date": "2021-11-04T20:58:12.454600+02:00",
+    "dateModified": "2021-11-04T20:58:44.547484+02:00",
+    "owner": "broker",
+    "mode": "test",
+    "agreementType": "electronicCatalogue",
+    "frameworkID": "febe3a905fe24e9fbac0ebb08ccb9ec4",
+    "period": {
+      "startDate": "2021-11-04T20:58:12.454600+02:00",
+      "endDate": "2021-11-06T23:19:47.165452+02:00"
+    },
+    "procuringEntity": {
+      "name": "ЦЗО №1",
+      "identifier": {
+        "scheme": "UA-EDR",
+        "id": "40996564",
+        "legalName": "ДП Центральний закупівельний орган №1"
+      },
+      "address": {
+        "countryName": "Україна",
+        "streetAddress": "вул. Банкова, 11, корпус 1",
+        "locality": "м. Київ",
+        "region": "м. Київ",
+        "postalCode": "01220"
+      },
+      "contactPoint": {
+        "name": "Довідкова",
+        "telephone": "0440000000",
+        "email": "aa@aa.com"
+      },
+      "kind": "central"
+    },
+    "classification": {
+      "description": "Mustard seeds",
+      "scheme": "ДК021",
+      "id": "30190000-7"
+    },
+    "additionalClassifications": [
+      {
+        "scheme": "ДК003",
+        "id": "17.21.1",
+        "description": "папір і картон гофровані, паперова й картонна тара"
+      }
+    ],
+    "contracts": [
+      {
+        "id": "85c3529ffce44ec58700b26a97cefe81",
+        "qualificationID": "6615a0493d5b4ab1b5fa29ce37b557c0",
+        "status": "active",
+        "submissionID": "e62ddefe87e54803954a754e54837d4d",
+        "suppliers": [
+          {
+            "name": "Державне управління справами",
+            "name_en": "State administration",
+            "identifier": {
+              "scheme": "UA-EDR",
+              "id": "00037255",
+              "legalName": "Державне управління справами",
+              "legalName_en": "dus.gov.ua",
+              "uri": "http://www.dus.gov.ua/"
+            },
+            "address": {
+              "streetAddress": "вул. Банкова, 11, корпус 1",
+              "locality": "м. Київ",
+              "region": "м. Київ",
+              "postalCode": "01220",
+              "countryName": "Україна"
+            },
+            "scale": "micro",
+            "contactPoint": {
+              "name": "Державне управління справами",
+              "name_en": "State administration",
+              "email": "aa@aa.com",
+              "telephone": "0440000000"
+            }
+          }
+        ],
+        "milestones": [
+          {
+            "id": "a01ece2cbc0040c3805ca42cb2ee4452",
+            "type": "activation",
+            "status": "scheduled",
+            "dueDate": "2021-11-06T23:19:47.165452+02:00",
+            "dateModified": "2021-11-04T20:58:12.520529+02:00"
+          }
+        ],
+        "date": "2021-11-04T20:58:12.520564+02:00"
+      },
+      {
+        "id": "0e311d41a82c4922ac21a39f5b3afd7b",
+        "qualificationID": "e2257a4925624fa4aba6294e6529686e",
+        "status": "active",
+        "submissionID": "681f5fa385c24b8f872cecc0fd660cba",
+        "suppliers": [
+          {
+            "name": "Державне управління справами",
+            "name_en": "State administration",
+            "identifier": {
+              "scheme": "UA-EDR",
+              "id": "00037254",
+              "legalName": "Державне управління справами",
+              "legalName_en": "dus.gov.ua",
+              "uri": "http://www.dus.gov.ua/"
+            },
+            "address": {
+              "streetAddress": "вул. Банкова, 11, корпус 1",
+              "locality": "м. Київ",
+              "region": "м. Київ",
+              "postalCode": "01220",
+              "countryName": "Україна"
+            },
+            "scale": "micro",
+            "contactPoint": {
+              "name": "Державне управління справами",
+              "name_en": "State administration",
+              "email": "aa@aa.com",
+              "telephone": "0440000000"
+            }
+          }
+        ],
+        "milestones": [
+          {
+            "id": "31d213234d4c4609ab1374556011582d",
+            "type": "activation",
+            "status": "scheduled",
+            "dueDate": "2021-11-06T23:19:47.165452+02:00",
+            "dateModified": "2021-11-04T20:58:26.448286+02:00"
+          }
+        ],
+        "date": "2021-11-04T20:58:26.448303+02:00"
+      },
+      {
+        "id": "8e6c59e439f04c419c47b463f63cec89",
+        "qualificationID": "2cb8bf3469a944479f873aefc45493a4",
+        "status": "active",
+        "submissionID": "bf0577012b614b45acfc52ad2e3c857a",
+        "suppliers": [
+          {
+            "name": "Державне управління справами",
+            "name_en": "State administration",
+            "identifier": {
+              "scheme": "UA-EDR",
+              "id": "00037253",
+              "legalName": "Державне управління справами",
+              "legalName_en": "dus.gov.ua",
+              "uri": "http://www.dus.gov.ua/"
+            },
+            "address": {
+              "streetAddress": "вул. Банкова, 11, корпус 1",
+              "locality": "м. Київ",
+              "region": "м. Київ",
+              "postalCode": "01220",
+              "countryName": "Україна"
+            },
+            "scale": "micro",
+            "contactPoint": {
+              "name": "Державне управління справами",
+              "name_en": "State administration",
+              "email": "aa@aa.com",
+              "telephone": "0440000000"
+            }
+          }
+        ],
+        "milestones": [
+          {
+            "id": "7563d2218f8d41ecb8a8b6b6b44cbfee",
+            "type": "activation",
+            "status": "scheduled",
+            "dueDate": "2021-11-06T23:19:47.165452+02:00",
+            "dateModified": "2021-11-04T20:58:35.770879+02:00"
+          }
+        ],
+        "date": "2021-11-04T20:58:35.770897+02:00"
+      },
+      {
+        "id": "64c4b44afafa49d9bacbb938c88ba020",
+        "qualificationID": "1c74b9b8e3d7469aa71706139f7fc0c4",
+        "status": "active",
+        "submissionID": "54bc77b1a2b3480f9afdeb66dcef8e2e",
+        "suppliers": [
+          {
+            "name": "Державне управління справами",
+            "name_en": "State administration",
+            "identifier": {
+              "scheme": "UA-EDR",
+              "id": "00037252",
+              "legalName": "Державне управління справами",
+              "legalName_en": "dus.gov.ua",
+              "uri": "http://www.dus.gov.ua/"
+            },
+            "address": {
+              "streetAddress": "вул. Банкова, 11, корпус 1",
+              "locality": "м. Київ",
+              "region": "м. Київ",
+              "postalCode": "01220",
+              "countryName": "Україна"
+            },
+            "scale": "micro",
+            "contactPoint": {
+              "name": "Державне управління справами",
+              "name_en": "State administration",
+              "email": "aa@aa.com",
+              "telephone": "0440000000"
+            }
+          }
+        ],
+        "milestones": [
+          {
+            "id": "a90a1734d342401c959e3c37f0a5e6bd",
+            "type": "activation",
+            "status": "scheduled",
+            "dueDate": "2021-11-06T23:19:47.165452+02:00",
+            "dateModified": "2021-11-04T20:58:44.545584+02:00"
+          }
+        ],
+        "date": "2021-11-04T20:58:44.545601+02:00"
+      }
+    ],
+    "next_check": "2021-11-06T23:19:47.165452+02:00"
+  }
+}
