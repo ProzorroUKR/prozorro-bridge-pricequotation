@@ -48,11 +48,11 @@ async def process_listing(session: ClientSession, tender: dict) -> None:
     tender = await get_tender(tender_id, session)
 
     profiles = await get_tender_profiles(tender, session)
-    if not any(profiles):
+    if not all(profiles):
         return None
 
     agreements = await check_agreements(tender, profiles, session)
-    if not any(agreements):
+    if not all(agreements):
         return None
 
     shortlisted_firms = await get_tender_shortlisted_firms(tender, session, agreements)
