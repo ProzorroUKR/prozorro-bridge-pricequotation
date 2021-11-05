@@ -47,7 +47,7 @@ async def find_recursive_agreements_by_classification_id(classification_id: str,
     return
 
 
-async def _check_agreements(tender: dict, profile: dict, session: ClientSession) -> bool:
+async def _check_agreements(tender: dict, profile: dict, session: ClientSession) -> list:
     tender_id = tender["id"]
     classification_id = profile.get("data", {}).get("classification", {}).get("id")
     additional_classifications = profile.get("data", {}).get("additionalClassifications", [])
@@ -65,8 +65,8 @@ async def _check_agreements(tender: dict, profile: dict, session: ClientSession)
         )
         reason = u"Для обраного профілю немає активних реєстрів"
         await decline_resource(tender_id, reason, session)
-        return False
-    return True
+        return []
+    return agreements
 
 
 async def check_agreements(tender: dict, profiles: list, session: ClientSession) -> list:

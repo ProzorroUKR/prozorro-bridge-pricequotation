@@ -12,7 +12,7 @@ from base import TEST_PROFILE, TEST_NEW_TENDER, TEST_NEW_AGREEMENT
 
 @pytest.mark.asyncio
 @patch("prozorro_bridge_pricequotation.bridge.LOGGER")
-async def test_get_shortlisted_firms_if_contract_is_not_active(mocked_logger):
+async def test_get_new_shortlisted_firms_if_contract_is_not_active(mocked_logger):
     tender_data = copy.deepcopy(TEST_NEW_TENDER)
     agreement_data = copy.deepcopy(TEST_NEW_AGREEMENT)
     agreement = agreement_data.get('data', {})
