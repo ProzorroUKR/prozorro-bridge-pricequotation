@@ -7,6 +7,7 @@ from prozorro_bridge_pricequotation.utils import journal_context, decline_resour
 
 async def _get_tender_shortlisted_firms(tender: dict, session: ClientSession) -> list or None:
     tender_id = tender["id"]
+    tender_date_modified = tender['dateModified']
     agreement_id = tender.get("agreement", {}).get("id")
     if not agreement_id:
         LOGGER.error(
@@ -55,13 +56,14 @@ async def _get_tender_shortlisted_firms(tender: dict, session: ClientSession) ->
                 )
             )
             reason = u"В обраних реєстрах немає активних постачальників"
-            await decline_resource(tender_id, reason, session)
+            await decline_resource(tender_id, reason, session, tender_date_modified)
             return
     return shortlisted_firms
 
 
 async def _get_tender_shortlisted_firms_by_agreement(tender: dict, session: ClientSession, agreements: list) -> list or None:
     tender_id = tender["id"]
+    tender_date_modified = tender['dateModified']
     shortlisted_firms = []
     for agreement in agreements:
         for contract in agreement.get("contracts"):
@@ -75,7 +77,7 @@ async def _get_tender_shortlisted_firms_by_agreement(tender: dict, session: Clie
             f"This agreement {''} doesn`t have qualified suppliers",
         )
         reason = u"В обраних реєстрах немає активних постачальників"
-        await decline_resource(tender_id, reason, session)
+        await decline_resource(tender_id, reason, session, tender_date_modified)
         return
     return shortlisted_firms
 

@@ -1,6 +1,7 @@
 from aiohttp import ClientSession
 from prozorro_bridge_pricequotation.journal_msg_ids import TENDER_SWITCHED, TENDER_NOT_SWITCHED, TENDER_INFO
 from prozorro_bridge_pricequotation.settings import LOGGER, HEADERS, CDB_BASE_URL
+from prozorro_bridge_pricequotation.db import cache_db
 
 
 def journal_context(record: dict = None, params: dict = None) -> dict:
@@ -22,7 +23,7 @@ async def patch_tender(tender_id: str, patch_data: dict, session: ClientSession)
         return True
 
 
-async def decline_resource(tender_id: str, reason: str,  session: ClientSession) -> dict or None:
+async def decline_resource(tender_id: str, reason: str,  session: ClientSession, tender_date_modified: str) -> dict or None:
     status = "draft.unsuccessful"
     patch_data = {"data": {"status": status, "unsuccessfulReason": [reason]}}
     is_patch = await patch_tender(tender_id, patch_data, session)
@@ -32,6 +33,7 @@ async def decline_resource(tender_id: str, reason: str,  session: ClientSession)
                         {"MESSAGE_ID": TENDER_SWITCHED},
                         params={"TENDER_ID": tender_id, "STATUS": status})
                     )
+        await cache_db.cache_collection(tender_id, tender_date_modified)
     else:
         LOGGER.info(f"Not switch tender {tender_id} to {status} with reason {reason}",
                     extra=journal_context(
@@ -54,3 +56,7 @@ def check_tender(tender: dict) -> bool:
         ),
     )
     return False
+
+
+async def check_cache(tender) -> bool:
+    return await cache_db.has_collection(tender["id"])

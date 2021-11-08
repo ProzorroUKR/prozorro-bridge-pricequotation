@@ -1,13 +1,14 @@
 import asyncio
 import json
 from aiohttp import ClientSession
+from prozorro_bridge_pricequotation.db import cache_db
 from prozorro_bridge_pricequotation.process.profile import get_tender_profiles
 from prozorro_bridge_pricequotation.process.items import get_tender_items
 from prozorro_bridge_pricequotation.process.criteria import get_criteria
 from prozorro_bridge_pricequotation.process.agreements import check_agreements
 from prozorro_bridge_pricequotation.process.shortlisted_firms import get_tender_shortlisted_firms
 from prozorro_bridge_pricequotation.settings import HEADERS, CDB_BASE_URL, LOGGER, ERROR_INTERVAL
-from prozorro_bridge_pricequotation.utils import patch_tender, journal_context, check_tender
+from prozorro_bridge_pricequotation.utils import patch_tender, journal_context, check_tender, check_cache
 from prozorro_bridge_pricequotation.journal_msg_ids import (
     TENDER_EXCEPTION,
     TENDER_PATCHED,
@@ -44,6 +45,9 @@ async def get_tender(tender_id: str, session: ClientSession) -> dict:
 async def process_listing(session: ClientSession, tender: dict) -> None:
     if not check_tender(tender):
         return None
+    if await check_cache(tender):
+        return None
+
     tender_id = tender["id"]
     tender = await get_tender(tender_id, session)
 
@@ -85,6 +89,7 @@ async def process_listing(session: ClientSession, tender: dict) -> None:
                 params={"TENDER_ID": tender_id},
             ),
         )
+        await cache_db.cache_collection(tender["id"], tender["dateModified"])
         return
     LOGGER.info(
         f"Unsuccessful patch tender {tender_id}",

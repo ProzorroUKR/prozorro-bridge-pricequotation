@@ -50,14 +50,26 @@ async def test_process_listing(mocked_logger):
         ]
     )
 
+    cache_db = AsyncMock()
+    cache_db.has_collection = AsyncMock(return_value=False)
+    cache_db.cache_collection = AsyncMock(return_value=None)
+
     fid_data = {
         "id": tender_data["data"]["id"],
         "status": tender_data["data"]["status"],
         "procurementMethodType": tender_data["data"]["procurementMethodType"]
     }
     with patch("prozorro_bridge_pricequotation.bridge.asyncio.sleep", AsyncMock()) as mocked_sleep:
-        await process_listing(session_mock, fid_data)
+        with patch("prozorro_bridge_pricequotation.db.cache_db", cache_db):
+            with patch("prozorro_bridge_pricequotation.utils.cache_db", cache_db):
+                with patch("prozorro_bridge_pricequotation.bridge.cache_db", cache_db):
+                    await process_listing(session_mock, fid_data)
+
     assert session_mock.post.await_count == 0
+    assert session_mock.get.await_count == 3
+    assert session_mock.patch.await_count == 1
+    assert cache_db.has_collection.await_count == 1
+    assert cache_db.cache_collection.await_count == 1
 
 
 @pytest.mark.asyncio
