@@ -37,7 +37,6 @@ coverage run --source=./src/prozorro_bridge_pricequotation -m pytest tests/
 - ```CRAWLER_USER_AGENT``` - Set value of variable to all requests header `User-Agent`
 - ```MONGODB_DATABASE``` - Name of database
 - ```MONGODB_PRICEQUOTATION_COLLECTION``` - Name of collection where will be stored processed pq
-- ```MONGODB_CONFIG_COLLECTION``` - Name collection for pq settings (weekends and max streams count)
 - ```API_TOKEN``` - Service access token to CDB
 - ```USER_AGENT``` - Value of header to be added to requests
 
