@@ -1,0 +1,170 @@
+{
+  "data": {
+    "title": "Папір для друку, А4, 80 г/м², клас A, 500 арк., білий",
+    "description": "Папір для друку, А4, 80 г/м², клас A, 500 арк., білий",
+    "status": "active",
+    "unit": {
+      "code": "RM",
+      "name": "штуки"
+    },
+    "value": {
+      "amount": 1000000,
+      "currency": "UAH",
+      "valueAddedTaxIncluded": true
+    },
+    "relatedCategory": "30190000-501919-40996564",
+    "images": [],
+    "criteria": [
+      {
+        "id": "801157-0001",
+        "title": "Формат паперу",
+        "code": "OCDS-PAPER-FORMAT",
+        "description": "Формат паперу",
+        "requirementGroups": [
+          {
+            "id": "801157-0001-001",
+            "description": "Формат паперу А4 (210х297 мм)",
+            "requirements": [
+              {
+                "id": "801157-0001-001-01",
+                "title": "Формат паперу",
+                "dataType": "string",
+                "expectedValue": "А4 (210х297 мм)"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "801157-0002",
+        "title": "Щільність аркуша",
+        "code": "OCDS-PAPER-DENSITY",
+        "description": "Щільність аркуша",
+        "requirementGroups": [
+          {
+            "id": "801157-0002-001",
+            "description": "Щільність аркуша 80 гр/м²",
+            "requirements": [
+              {
+                "id": "801157-0002-001-01",
+                "title": "Щільність аркуша",
+                "dataType": "integer",
+                "expectedValue": 80
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "801157-0003",
+        "title": "Товщина аркуша",
+        "code": "OCDS-PAPER-THICKNESS",
+        "description": "Товщина аркуша",
+        "requirementGroups": [
+          {
+            "id": "801157-0003-001",
+            "description": "Товщина аркуша, не менше 105 мкм",
+            "requirements": [
+              {
+                "id": "801157-0003-001-01",
+                "title": "Товщина аркуша",
+                "dataType": "integer",
+                "minValue": 105
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "801157-0004",
+        "title": "Непрозорість паперу",
+        "code": "OCDS-PAPER-OPACITY",
+        "description": "Непрозорість паперу",
+        "requirementGroups": [
+          {
+            "id": "801157-0004-001",
+            "description": "Непрозорість паперу, не менше 92%",
+            "requirements": [
+              {
+                "id": "801157-0004-001-01",
+                "title": "Непрозорість паперу",
+                "dataType": "integer",
+                "minValue": 92
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "801157-0005",
+        "title": "Кількість аркушів в пачці",
+        "code": "OCDS-PAPER-PACKAGING",
+        "description": "Кількість аркушів в пачці",
+        "requirementGroups": [
+          {
+            "id": "801157-0005-001",
+            "description": "Кількість аркушів в пачці 500 шт.",
+            "requirements": [
+              {
+                "id": "801157-0005-001-01",
+                "title": "Кількість аркушів в пачці",
+                "dataType": "integer",
+                "expectedValue": 500
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "801157-0006",
+        "title": "Колір паперу",
+        "code": "OCDS-PAPER-COLOUR",
+        "description": "Колір паперу",
+        "requirementGroups": [
+          {
+            "id": "801157-0006-001",
+            "description": "Колір паперу білий",
+            "requirements": [
+              {
+                "id": "801157-0006-001-01",
+                "title": "Колір паперу",
+                "dataType": "string",
+                "expectedValue": "білий"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "801157-0007",
+        "title": "Білизна аркуша",
+        "code": "OCDS-PAPER-WHITENESS",
+        "description": "Білизна аркуша",
+        "requirementGroups": [
+          {
+            "id": "801157-0007-001",
+            "description": "Білизна аркуша CIE, не менше 161%",
+            "requirements": [
+              {
+                "id": "801157-0007-001-01",
+                "title": "Білизна аркуша",
+                "dataType": "integer",
+                "minValue": 161
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "classification": {
+      "id": "30191000-4",
+      "description": "Офісне устаткування, крім меблів",
+      "scheme": "ДК021"
+    },
+    "additionalClassifications": [],
+    "agreementID": "f19a3bfad068402c868fabd2bcee30c9",
+    "dateModified": "2021-11-15T17:19:02.647512+02:00",
+    "id": "999999-33140000-555666-42000111",
+    "owner": "12345678"
+  }
+}

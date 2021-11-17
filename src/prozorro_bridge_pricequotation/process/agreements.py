@@ -47,7 +47,7 @@ async def find_recursive_agreements_by_classification_id(classification_id: str,
     return
 
 
-async def _check_agreements(tender: dict, profile: dict, session: ClientSession) -> list:
+async def _old_check_agreements(tender: dict, profile: dict, session: ClientSession) -> list:
     tender_id = tender["id"]
     tender_date_modified = tender['dateModified']
     classification_id = profile.get("data", {}).get("classification", {}).get("id")
@@ -70,10 +70,28 @@ async def _check_agreements(tender: dict, profile: dict, session: ClientSession)
     return agreements
 
 
+async def _new_check_agreements(tender: dict, profile: dict, session: ClientSession) -> list:
+    tender_id = tender["id"]
+    tender_date_modified = tender['dateModified']
+    profile_agreement_id = profile.get("data", {}).get("agreementID")
+    tender_agreement_id = tender.get("agreement", {}).get("id")
+    if profile_agreement_id != tender_agreement_id:
+        LOGGER.error(
+            "There are no any active agreement by {}".format(tender_agreement_id)
+        )
+        reason = u"Для обраного профілю немає активних реєстрів"
+        await decline_resource(tender_id, reason, session, tender_date_modified)
+        return []
+    return [True]
+
+
 async def check_agreements(tender: dict, profiles: list, session: ClientSession) -> list:
     tender_id = tender["id"]
     try:
         agreements = []
+        _check_agreements = _old_check_agreements
+        if tender.get("agreement", {}).get("id"):
+            _check_agreements = _new_check_agreements
         for profile in profiles:
             agreement = await _check_agreements(tender, profile, session)
             if not agreement:

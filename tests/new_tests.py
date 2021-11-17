@@ -7,7 +7,35 @@ from prozorro_bridge_pricequotation.bridge import (
 )
 from prozorro_bridge_pricequotation.process.profile import get_tender_profiles
 from prozorro_bridge_pricequotation.process.shortlisted_firms import get_tender_shortlisted_firms
-from base import TEST_PROFILE, TEST_NEW_TENDER, TEST_NEW_AGREEMENT
+from prozorro_bridge_pricequotation.process.agreements import check_agreements
+from base import TEST_NEW_TENDER, TEST_NEW_AGREEMENT, TEST_NEW_PROFILE
+
+
+@pytest.mark.asyncio
+@patch("prozorro_bridge_pricequotation.bridge.LOGGER")
+async def test_check_new_agreements_is_not_valid(mocked_logger):
+    tender_data = copy.deepcopy(TEST_NEW_TENDER)
+    profile_data = copy.deepcopy(TEST_NEW_PROFILE)
+    profile_data["data"]["agreementID"] = ""
+    session_mock = AsyncMock()
+
+    with patch("prozorro_bridge_pricequotation.bridge.asyncio.sleep", AsyncMock()) as mocked_sleep:
+        agreements = await check_agreements(tender_data["data"], [profile_data], session_mock)
+
+    assert [] == agreements
+
+
+@pytest.mark.asyncio
+@patch("prozorro_bridge_pricequotation.bridge.LOGGER")
+async def test_check_new_agreements_is_valid(mocked_logger):
+    tender_data = copy.deepcopy(TEST_NEW_TENDER)
+    profile_data = copy.deepcopy(TEST_NEW_PROFILE)
+    session_mock = AsyncMock()
+
+    with patch("prozorro_bridge_pricequotation.bridge.asyncio.sleep", AsyncMock()) as mocked_sleep:
+        agreements = await check_agreements(tender_data["data"], [profile_data], session_mock)
+
+    assert [[True]] == agreements
 
 
 @pytest.mark.asyncio
@@ -57,7 +85,7 @@ async def test_get_new_shortlisted_firms_if_contract_is_active(mocked_logger):
 @patch("prozorro_bridge_pricequotation.bridge.LOGGER")
 async def test_get_new_profile_if_status_is_not_active(mocked_logger):
     tender_data = copy.deepcopy(TEST_NEW_TENDER)
-    profile_data = copy.deepcopy(TEST_PROFILE)
+    profile_data = copy.deepcopy(TEST_NEW_PROFILE)
     session_mock = AsyncMock()
     session_mock.get = AsyncMock(
         side_effect=[
@@ -80,7 +108,7 @@ async def test_get_new_profile_if_status_is_not_active(mocked_logger):
 @patch("prozorro_bridge_pricequotation.bridge.LOGGER")
 async def test_get_new_profile_if_status_is_general(mocked_logger):
     tender_data = copy.deepcopy(TEST_NEW_TENDER)
-    profile_data = copy.deepcopy(TEST_PROFILE)
+    profile_data = copy.deepcopy(TEST_NEW_PROFILE)
     profile_data["data"]["status"] = "general"
     session_mock = AsyncMock()
     session_mock.get = AsyncMock(
@@ -103,7 +131,7 @@ async def test_get_new_profile_if_status_is_general(mocked_logger):
 @patch("prozorro_bridge_pricequotation.bridge.LOGGER")
 async def test_get_new_profile_if_status_is_active(mocked_logger):
     tender_data = copy.deepcopy(TEST_NEW_TENDER)
-    profile_data = copy.deepcopy(TEST_PROFILE)
+    profile_data = copy.deepcopy(TEST_NEW_PROFILE)
     session_mock = AsyncMock()
     session_mock.get = AsyncMock(
         side_effect=[
@@ -125,7 +153,7 @@ async def test_get_new_profile_if_status_is_active(mocked_logger):
 @patch("prozorro_bridge_pricequotation.bridge.LOGGER")
 async def test_new_process_listing(mocked_logger):
     tender_data = copy.deepcopy(TEST_NEW_TENDER)
-    profile_data = copy.deepcopy(TEST_PROFILE)
+    profile_data = copy.deepcopy(TEST_NEW_PROFILE)
     agreement_data = copy.deepcopy(TEST_NEW_AGREEMENT)
 
     session_mock = AsyncMock()
@@ -142,11 +170,23 @@ async def test_new_process_listing(mocked_logger):
         ]
     )
 
+    cache_db = AsyncMock()
+    cache_db.has_collection = AsyncMock(return_value=False)
+    cache_db.cache_collection = AsyncMock(return_value=None)
+
     fid_data = {
         "id": tender_data["data"]["id"],
         "status": tender_data["data"]["status"],
         "procurementMethodType": tender_data["data"]["procurementMethodType"]
     }
     with patch("prozorro_bridge_pricequotation.bridge.asyncio.sleep", AsyncMock()) as mocked_sleep:
-        await process_listing(session_mock, fid_data)
+        with patch("prozorro_bridge_pricequotation.db.cache_db", cache_db):
+            with patch("prozorro_bridge_pricequotation.utils.cache_db", cache_db):
+                with patch("prozorro_bridge_pricequotation.bridge.cache_db", cache_db):
+                    await process_listing(session_mock, fid_data)
+
     assert session_mock.post.await_count == 0
+    assert session_mock.get.await_count == 3
+    assert session_mock.patch.await_count == 1
+    assert cache_db.has_collection.await_count == 1
+    assert cache_db.cache_collection.await_count == 1

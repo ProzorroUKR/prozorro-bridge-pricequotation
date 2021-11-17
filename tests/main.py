@@ -8,8 +8,46 @@ from prozorro_bridge_pricequotation.bridge import (
 )
 from prozorro_bridge_pricequotation.process.profile import get_tender_profiles
 from prozorro_bridge_pricequotation.process.shortlisted_firms import get_tender_shortlisted_firms
+from prozorro_bridge_pricequotation.process.agreements import check_agreements
 from prozorro_bridge_pricequotation.utils import check_tender
 from base import TEST_TENDER, TEST_PROFILE, TEST_AGREEMENT
+
+
+@pytest.mark.asyncio
+@patch("prozorro_bridge_pricequotation.bridge.LOGGER")
+async def test_check_old_agreements_is_not_valid(mocked_logger):
+    tender_data = copy.deepcopy(TEST_TENDER)
+    profile_data = copy.deepcopy(TEST_PROFILE)
+    session_mock = AsyncMock()
+    session_mock.get = AsyncMock(
+        side_effect=[
+            MagicMock(status=400),
+        ]
+    )
+
+    with patch("prozorro_bridge_pricequotation.bridge.asyncio.sleep", AsyncMock()) as mocked_sleep:
+        agreements = await check_agreements(tender_data["data"], [profile_data], session_mock)
+
+    assert [] == agreements
+
+
+@pytest.mark.asyncio
+@patch("prozorro_bridge_pricequotation.bridge.LOGGER")
+async def test_check_old_agreements_is_valid(mocked_logger):
+    tender_data = copy.deepcopy(TEST_TENDER)
+    profile_data = copy.deepcopy(TEST_PROFILE)
+    agreement_data = copy.deepcopy(TEST_AGREEMENT)
+    session_mock = AsyncMock()
+    session_mock.get = AsyncMock(
+        side_effect=[
+            MagicMock(status=200, text=AsyncMock(return_value=json.dumps(agreement_data))),
+        ]
+    )
+
+    with patch("prozorro_bridge_pricequotation.bridge.asyncio.sleep", AsyncMock()) as mocked_sleep:
+        agreements = await check_agreements(tender_data["data"], [profile_data], session_mock)
+
+    assert [agreement_data["data"]] == agreements
 
 
 @pytest.mark.asyncio

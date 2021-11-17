@@ -13,7 +13,7 @@
     "awardCriteria": "lowestCost",
     "submissionMethod": "electronicAuction",
     "submissionMethodDetails": "quick",
-    "status": "draft.unsuccessful",
+    "status": "draft.publishing",
     "items": [
       {
         "id": "49606a08c0724110bb09595d7d4b9c93",
@@ -284,9 +284,6 @@
       }
     ],
     "noticePublicationDate": "2021-11-05T13:41:12.145943+02:00",
-    "unsuccessfulReason": [
-      "Обраний профіль не існує в системі Prozorro.Market"
-    ],
     "id": "d8d5728998f24d38861ccdc00a5fda1a"
   }
 }
