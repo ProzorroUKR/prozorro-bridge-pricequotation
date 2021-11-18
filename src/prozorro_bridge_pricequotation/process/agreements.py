@@ -79,7 +79,7 @@ async def _new_check_agreements(tender: dict, profile: dict, session: ClientSess
         LOGGER.error(
             "There are no any active agreement by {}".format(tender_agreement_id)
         )
-        reason = u"Для обраного профілю немає активних реєстрів"
+        reason = u"Обрані профіля не відповідають обраному реєстру"
         await decline_resource(tender_id, reason, session, tender_date_modified)
         return []
     return [True]
