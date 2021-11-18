@@ -89,9 +89,9 @@ async def check_agreements(tender: dict, profiles: list, session: ClientSession)
     tender_id = tender["id"]
     try:
         agreements = []
-        _check_agreements = _old_check_agreements
+        _check_agreements = _new_check_agreements
         if tender.get("agreement", {}).get("id"):
-            _check_agreements = _new_check_agreements
+            _check_agreements = _old_check_agreements
         for profile in profiles:
             agreement = await _check_agreements(tender, profile, session)
             if not agreement:
