@@ -41,6 +41,12 @@ async def _get_tender_shortlisted_firms(tender: dict, session: ClientSession) ->
         shortlisted_firms = []
         agreements = json.loads(await response.text())
         agreements_data = agreements.get("data", {})
+
+        if agreements_data.get("status", "") == "terminated":
+            reason = u"Для обраного профілю немає активних реєстрів"
+            await decline_resource(tender_id, reason, session, tender_date_modified)
+            return
+
         for contract in agreements_data.get("contracts"):
             if contract.get("status") == "active":
                 suppliers = contract.get("suppliers", [])
