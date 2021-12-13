@@ -43,9 +43,9 @@ async def decline_resource(tender_id: str, reason: str,  session: ClientSession,
 
 
 def check_tender(tender: dict) -> bool:
-    tender_procurementMethodType = tender["procurementMethodType"]
-    tender_status = tender["status"]
-    tender_id = tender["id"]
+    tender_procurementMethodType = tender.get("procurementMethodType")
+    tender_status = tender.get("status")
+    tender_id = tender.get("id")
     if tender_procurementMethodType == "priceQuotation" and tender_status == "draft.publishing":
         return True
     LOGGER.info(
