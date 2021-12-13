@@ -2,6 +2,7 @@ from aiohttp import ClientSession
 import asyncio
 from prozorro_crawler.main import main
 from prozorro_bridge_pricequotation.bridge import process_listing
+from prozorro_bridge_pricequotation.settings import SENTRY_DSN
 
 
 async def data_handler(session: ClientSession, items: list) -> None:
@@ -13,4 +14,8 @@ async def data_handler(session: ClientSession, items: list) -> None:
 
 
 if __name__ == "__main__":
+    import sentry_sdk
+    if SENTRY_DSN:
+        sentry_sdk.init(dsn=SENTRY_DSN)
+
     main(data_handler)

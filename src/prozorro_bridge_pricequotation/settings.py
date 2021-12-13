@@ -25,4 +25,6 @@ HEADERS = {
     "User-Agent": USER_AGENT,
 }
 
+SENTRY_DSN = os.environ.get("SENTRY_DSN", None)
+
 LOGGER = logger
