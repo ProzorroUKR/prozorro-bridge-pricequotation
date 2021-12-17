@@ -48,7 +48,7 @@ def check_tender(tender: dict) -> bool:
     tender_id = tender.get("id")
     if tender_procurementMethodType == "priceQuotation" and tender_status == "draft.publishing":
         return True
-    LOGGER.info(
+    LOGGER.debug(
         f"Skipping tender {tender_id} in status {tender_status} and procurementMethodType {tender_procurementMethodType}",
         extra=journal_context(
             {"MESSAGE_ID": TENDER_INFO},
