@@ -12,7 +12,7 @@ CDB_API_VERSION = os.environ.get("CDB_API_VERSION", "2.5")
 CDB_BASE_URL = f"{CDB_PUBLIC_API_HOST}/api/{CDB_API_VERSION}"
 
 CATALOG_API_HOST = os.environ.get("CATALOG_API_HOST", "https://catalog-api-sandbox-2.prozorro.gov.ua")
-CATALOG_BASE_URL = f"{CATALOG_API_HOST}/api/0"
+CATALOG_BASE_URL = f"{CATALOG_API_HOST}/api"
 
 API_OPT_FIELDS = os.environ.get("API_OPT_FIELDS", "status,procurementMethodType")
 
