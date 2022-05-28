@@ -1,8 +1,8 @@
 from aiohttp import ClientSession
 import json
 from prozorro_bridge_pricequotation.journal_msg_ids import TENDER_EXCEPTION, PROFILE_TO_SYNC, PROFILE_EXISTS
-from prozorro_bridge_pricequotation.settings import LOGGER, CATALOG_BASE_URL
-from prozorro_bridge_pricequotation.utils import journal_context, decline_resource
+from prozorro_bridge_pricequotation.settings import LOGGER
+from prozorro_bridge_pricequotation.utils import journal_context, decline_resource, CATALOG_BASE_URL
 
 
 async def _get_tender_profile(tender: dict, session: ClientSession, profile_id: str) -> dict or None:
