@@ -1,8 +1,8 @@
 from aiohttp import ClientSession
 import json
 from prozorro_bridge_pricequotation.journal_msg_ids import TENDER_EXCEPTION, AGREEMENTS_EXCEPTION
-from prozorro_bridge_pricequotation.settings import LOGGER, CDB_BASE_URL
-from prozorro_bridge_pricequotation.utils import journal_context, decline_resource
+from prozorro_bridge_pricequotation.settings import LOGGER
+from prozorro_bridge_pricequotation.utils import journal_context, decline_resource, BASE_URL
 
 
 async def _get_tender_shortlisted_firms(tender: dict, session: ClientSession) -> list or None:
@@ -18,7 +18,7 @@ async def _get_tender_shortlisted_firms(tender: dict, session: ClientSession) ->
             )
         )
         return
-    response = await session.get(f"{CDB_BASE_URL}/agreements/{agreement_id}")
+    response = await session.get(f"{BASE_URL}/agreements/{agreement_id}")
     if response.status == 404:
         LOGGER.error(
             f"Agreement not found by agreement_id {agreement_id}",

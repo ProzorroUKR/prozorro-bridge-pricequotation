@@ -1,7 +1,18 @@
 from aiohttp import ClientSession
+from prozorro_crawler.settings import API_VERSION, CRAWLER_USER_AGENT
+
 from prozorro_bridge_pricequotation.journal_msg_ids import TENDER_SWITCHED, TENDER_NOT_SWITCHED, TENDER_INFO
-from prozorro_bridge_pricequotation.settings import LOGGER, HEADERS, CDB_BASE_URL
-from prozorro_bridge_pricequotation.db import cache_db
+from prozorro_bridge_pricequotation.settings import LOGGER, API_HOST, API_TOKEN, CATALOG_API_HOST
+
+
+BASE_URL = f"{API_HOST}/api/{API_VERSION}"
+CATALOG_BASE_URL = f"{CATALOG_API_HOST}/api"
+
+HEADERS = {
+    "Content-Type": "application/json",
+    "Authorization": f"Bearer {API_TOKEN}",
+    "User-Agent": CRAWLER_USER_AGENT,
+}
 
 
 def journal_context(record: dict = None, params: dict = None) -> dict:
@@ -15,7 +26,7 @@ def journal_context(record: dict = None, params: dict = None) -> dict:
 
 
 async def patch_tender(tender_id: str, patch_data: dict, session: ClientSession) -> bool:
-    url = "{}/tenders/{}".format(CDB_BASE_URL, tender_id)
+    url = "{}/tenders/{}".format(BASE_URL, tender_id)
     response = await session.patch(url, json=patch_data, headers=HEADERS)
     if response.status != 200:
         return False
@@ -33,7 +44,6 @@ async def decline_resource(tender_id: str, reason: str,  session: ClientSession,
                         {"MESSAGE_ID": TENDER_SWITCHED},
                         params={"TENDER_ID": tender_id, "STATUS": status})
                     )
-        await cache_db.cache_collection(tender_id, tender_date_modified)
     else:
         LOGGER.info(f"Not switch tender {tender_id} to {status} with reason {reason}",
                     extra=journal_context(
@@ -56,7 +66,3 @@ def check_tender(tender: dict) -> bool:
         ),
     )
     return False
-
-
-async def check_cache(tender) -> bool:
-    return await cache_db.has_collection(tender["id"])

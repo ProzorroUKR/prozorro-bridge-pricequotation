@@ -2,12 +2,12 @@ import asyncio
 from aiohttp import ClientSession
 import json
 from prozorro_bridge_pricequotation.journal_msg_ids import AGREEMENTS_EXISTS, AGREEMENTS_EXCEPTION, PROFILE_EXCEPTION
-from prozorro_bridge_pricequotation.settings import LOGGER, CDB_BASE_URL
-from prozorro_bridge_pricequotation.utils import journal_context, decline_resource
+from prozorro_bridge_pricequotation.settings import LOGGER
+from prozorro_bridge_pricequotation.utils import journal_context, decline_resource, BASE_URL
 
 
 async def find_agreements_by_classification_id(classification_id: str, additional_classifications_ids: list, session: ClientSession, tender_id: str) -> list or None:
-    url = "{}/agreements_by_classification/{}".format(CDB_BASE_URL, classification_id)
+    url = "{}/agreements_by_classification/{}".format(BASE_URL, classification_id)
     params = {}
     if additional_classifications_ids:
         params["additional_classifications"] = ",".join(additional_classifications_ids)
