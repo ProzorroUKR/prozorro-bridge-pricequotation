@@ -14,8 +14,8 @@ async def data_handler(session: ClientSession, items: list) -> None:
 
 
 if __name__ == "__main__":
-    import sentry_sdk
     if SENTRY_DSN:
+        import sentry_sdk
         sentry_sdk.init(dsn=SENTRY_DSN)
 
     main(data_handler)
