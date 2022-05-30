@@ -16,6 +16,7 @@ HEADERS = {
 
 CATALOGUE_HEADERS = {
     "Content-Type": "application/json",
+    "Authorization": "",
     "User-Agent": CRAWLER_USER_AGENT,
 }
 
