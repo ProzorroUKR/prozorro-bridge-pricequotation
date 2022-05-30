@@ -40,22 +40,26 @@ async def patch_tender(tender_id: str, patch_data: dict, session: ClientSession)
         return True
 
 
-async def decline_resource(tender_id: str, reason: str,  session: ClientSession) -> dict or None:
+async def decline_resource(tender_id: str, reason: str, session: ClientSession) -> dict or None:
     status = "draft.unsuccessful"
     patch_data = {"data": {"status": status, "unsuccessfulReason": [reason]}}
     is_patch = await patch_tender(tender_id, patch_data, session)
     if is_patch:
-        LOGGER.info(f"Switch tender {tender_id} to {status} with reason {reason}",
-                    extra=journal_context(
-                        {"MESSAGE_ID": TENDER_SWITCHED},
-                        params={"TENDER_ID": tender_id, "STATUS": status})
-                    )
+        LOGGER.info(
+            f"Switch tender {tender_id} to {status} with reason: {reason}",
+            extra=journal_context(
+                {"MESSAGE_ID": TENDER_SWITCHED},
+                params={"TENDER_ID": tender_id, "STATUS": status}
+            )
+        )
     else:
-        LOGGER.info(f"Not switch tender {tender_id} to {status} with reason {reason}",
-                    extra=journal_context(
-                        {"MESSAGE_ID": TENDER_NOT_SWITCHED},
-                        params={"TENDER_ID": tender_id, "STATUS": status})
-                    )
+        LOGGER.info(
+            f"Not switch tender {tender_id} to {status} with reason: {reason}",
+            extra=journal_context(
+                {"MESSAGE_ID": TENDER_NOT_SWITCHED},
+                params={"TENDER_ID": tender_id, "STATUS": status}
+            )
+        )
 
 
 def check_tender(tender: dict) -> bool:
