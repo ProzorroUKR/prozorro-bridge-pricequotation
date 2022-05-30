@@ -15,8 +15,9 @@ async def _get_tender_profile(tender: dict, session: ClientSession, profile_id: 
         await decline_resource(tender_id, reason, session, tender_date_modified)
         return
     elif response.status != 200:
+        response_text = await response.text()
         LOGGER.info(
-            f"Fail to profile existance {profile_id}: {response.status}.",
+            f"Fail to profile existance {profile_id}: {response.status} {response_text}.",
             extra=journal_context(
                 {"MESSAGE_ID": PROFILE_TO_SYNC},
                 params={"PROFILE_ID": profile_id, "TENDER_ID": tender_id},
