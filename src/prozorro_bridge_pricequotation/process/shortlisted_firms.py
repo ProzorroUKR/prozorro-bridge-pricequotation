@@ -1,13 +1,19 @@
 from aiohttp import ClientSession
 import json
-from prozorro_bridge_pricequotation.journal_msg_ids import TENDER_EXCEPTION, AGREEMENTS_EXCEPTION
 from prozorro_bridge_pricequotation.settings import LOGGER
 from prozorro_bridge_pricequotation.utils import journal_context, decline_resource, BASE_URL
+from prozorro_bridge_pricequotation.journal_msg_ids import (
+    TENDER_EXCEPTION,
+    AGREEMENTS_EXCEPTION,
+)
+from prozorro_bridge_pricequotation.reasons import (
+    REASON_NO_ACTIVE_AGREEMENT,
+    REASON_NO_SHORTLISTED_FIRMS,
+)
 
 
 async def _get_tender_shortlisted_firms(tender: dict, session: ClientSession) -> list or None:
     tender_id = tender["id"]
-    tender_date_modified = tender['dateModified']
     agreement_id = tender.get("agreement", {}).get("id")
     if not agreement_id:
         LOGGER.error(
@@ -43,8 +49,7 @@ async def _get_tender_shortlisted_firms(tender: dict, session: ClientSession) ->
         agreements_data = agreements.get("data", {})
 
         if agreements_data.get("status", "") == "terminated":
-            reason = u"Для обраного профілю немає активних реєстрів"
-            await decline_resource(tender_id, reason, session, tender_date_modified)
+            await decline_resource(tender_id, REASON_NO_ACTIVE_AGREEMENT, session)
             return
 
         for contract in agreements_data.get("contracts"):
@@ -61,15 +66,17 @@ async def _get_tender_shortlisted_firms(tender: dict, session: ClientSession) ->
                     params={"TENDER_ID": tender_id, "AGREEMENT_ID": agreement_id}
                 )
             )
-            reason = u"В обраних реєстрах немає активних постачальників"
-            await decline_resource(tender_id, reason, session, tender_date_modified)
+            await decline_resource(tender_id, REASON_NO_SHORTLISTED_FIRMS, session)
             return
     return shortlisted_firms
 
 
-async def _get_tender_shortlisted_firms_by_agreement(tender: dict, session: ClientSession, agreements: list) -> list or None:
+async def _get_tender_shortlisted_firms_by_agreement(
+    tender: dict,
+    session: ClientSession,
+    agreements: list
+) -> list or None:
     tender_id = tender["id"]
-    tender_date_modified = tender['dateModified']
     shortlisted_firms = []
     for agreement in agreements:
         for contract in agreement.get("contracts"):
@@ -82,8 +89,7 @@ async def _get_tender_shortlisted_firms_by_agreement(tender: dict, session: Clie
         LOGGER.error(
             f"This agreement {''} doesn`t have qualified suppliers",
         )
-        reason = u"В обраних реєстрах немає активних постачальників"
-        await decline_resource(tender_id, reason, session, tender_date_modified)
+        await decline_resource(tender_id, REASON_NO_SHORTLISTED_FIRMS, session)
         return
     return shortlisted_firms
 
