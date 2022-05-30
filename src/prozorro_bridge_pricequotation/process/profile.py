@@ -2,13 +2,13 @@ from aiohttp import ClientSession
 import json
 from prozorro_bridge_pricequotation.journal_msg_ids import TENDER_EXCEPTION, PROFILE_TO_SYNC, PROFILE_EXISTS
 from prozorro_bridge_pricequotation.settings import LOGGER
-from prozorro_bridge_pricequotation.utils import journal_context, decline_resource, CATALOG_BASE_URL
+from prozorro_bridge_pricequotation.utils import journal_context, decline_resource, CATALOG_BASE_URL, CATALOGUE_HEADERS
 
 
 async def _get_tender_profile(tender: dict, session: ClientSession, profile_id: str) -> dict or None:
     tender_id = tender['id']
     tender_date_modified = tender['dateModified']
-    response = await session.get(f"{CATALOG_BASE_URL}/profiles/{profile_id}")
+    response = await session.get(f"{CATALOG_BASE_URL}/profiles/{profile_id}", headers=CATALOGUE_HEADERS)
     if response.status == 404:
         LOGGER.error(f"Profile {profile_id} not found in catalouges.")
         reason = u"Обраний профіль не існує в системі Prozorro.Market"

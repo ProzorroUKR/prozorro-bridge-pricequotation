@@ -14,6 +14,11 @@ HEADERS = {
     "User-Agent": CRAWLER_USER_AGENT,
 }
 
+CATALOGUE_HEADERS = {
+    "Content-Type": "application/json",
+    "User-Agent": CRAWLER_USER_AGENT,
+}
+
 
 def journal_context(record: dict = None, params: dict = None) -> dict:
     if record is None:
