@@ -7,12 +7,11 @@ from prozorro_bridge_pricequotation.utils import journal_context, decline_resour
 
 async def _get_tender_profile(tender: dict, session: ClientSession, profile_id: str) -> dict or None:
     tender_id = tender['id']
-    tender_date_modified = tender['dateModified']
     response = await session.get(f"{CATALOG_BASE_URL}/profiles/{profile_id}", headers=CATALOGUE_HEADERS)
     if response.status == 404:
         LOGGER.error(f"Profile {profile_id} not found in catalouges.")
         reason = u"Обраний профіль не існує в системі Prozorro.Market"
-        await decline_resource(tender_id, reason, session, tender_date_modified)
+        await decline_resource(tender_id, reason, session)
         return
     elif response.status != 200:
         response_text = await response.text()
@@ -39,13 +38,13 @@ async def _get_tender_profile(tender: dict, session: ClientSession, profile_id: 
         if profile_status == "general":
             LOGGER.error(f"Profile {profile_id} status '{profile_status}' is not available for publication, tender {tender_id}")
             reason = u"Обраний профіль (загальний) недоступний для публікації закупівлі \"Запит ціни пропозиції\" в Prozorro.Market"
-            await decline_resource(tender_id, reason, session, tender_date_modified)
+            await decline_resource(tender_id, reason, session)
             return
 
         if profile_status != "active":
             LOGGER.error(f"Profile {profile_id} status '{profile_status}' not equal 'active', tender {tender_id}")
             reason = u"Обраний профіль неактивний в системі Prozorro.Market"
-            await decline_resource(tender_id, reason, session, tender_date_modified)
+            await decline_resource(tender_id, reason, session)
             return
 
         return profile

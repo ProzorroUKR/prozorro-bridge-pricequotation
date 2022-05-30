@@ -1,7 +1,7 @@
 import copy
 import json
 import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
+from unittest.mock import patch, MagicMock, AsyncMock, ANY
 from prozorro_bridge_pricequotation.bridge import (
     process_listing, get_tender,
 )
@@ -31,7 +31,7 @@ async def test_check_tender_is_valid(mocked_logger):
 
 @pytest.mark.asyncio
 @patch("prozorro_bridge_pricequotation.bridge.LOGGER")
-async def test_check_new_agreements_is_not_valid(mocked_logger):
+async def test_new_check_agreements_is_not_valid(mocked_logger):
     tender_data = copy.deepcopy(TEST_NEW_TENDER)
     profile_data = copy.deepcopy(TEST_NEW_PROFILE)
     profile_data["data"]["agreementID"] = ""
@@ -40,30 +40,55 @@ async def test_check_new_agreements_is_not_valid(mocked_logger):
     with patch("prozorro_bridge_pricequotation.bridge.asyncio.sleep", AsyncMock()) as mocked_sleep:
         agreements = await check_agreements(tender_data["data"], [profile_data], session_mock)
 
+    session_mock.patch.assert_awaited_once_with(
+        ANY,
+        json={
+            "data": {
+                "status": "draft.unsuccessful",
+                "unsuccessfulReason": [u"Обрані профіля не відповідають обраному реєстру"]
+            }
+        },
+        headers=ANY
+    )
+
     assert [] == agreements
 
 
 @pytest.mark.asyncio
 @patch("prozorro_bridge_pricequotation.bridge.LOGGER")
-async def test_check_old_agreements_is_not_valid(mocked_logger):
+async def test_old_check_agreements_is_not_valid(mocked_logger):
     tender_data = copy.deepcopy(TEST_TENDER)
     profile_data = copy.deepcopy(TEST_PROFILE)
     session_mock = AsyncMock()
     session_mock.get = AsyncMock(
         side_effect=[
-            MagicMock(status=400),
+            MagicMock(status=200, text=AsyncMock(return_value=json.dumps({"data": []}))),
+            MagicMock(status=200, text=AsyncMock(return_value=json.dumps({"data": []}))),
         ]
     )
 
     with patch("prozorro_bridge_pricequotation.bridge.asyncio.sleep", AsyncMock()) as mocked_sleep:
         agreements = await check_agreements(tender_data["data"], [profile_data], session_mock)
 
+    assert session_mock.get.call_count == 2
+
+    session_mock.patch.assert_awaited_once_with(
+        ANY,
+        json={
+            "data": {
+                "status": "draft.unsuccessful",
+                "unsuccessfulReason": [u"Для обраного профілю немає активних реєстрів"]
+            }
+        },
+        headers=ANY
+    )
+
     assert [] == agreements
 
 
 @pytest.mark.asyncio
 @patch("prozorro_bridge_pricequotation.bridge.LOGGER")
-async def test_check_new_agreements_is_valid(mocked_logger):
+async def test_new_check_agreements_is_valid(mocked_logger):
     tender_data = copy.deepcopy(TEST_NEW_TENDER)
     profile_data = copy.deepcopy(TEST_NEW_PROFILE)
     session_mock = AsyncMock()
@@ -76,7 +101,7 @@ async def test_check_new_agreements_is_valid(mocked_logger):
 
 @pytest.mark.asyncio
 @patch("prozorro_bridge_pricequotation.bridge.LOGGER")
-async def test_check_old_agreements_is_valid(mocked_logger):
+async def test_old_check_agreements_is_valid(mocked_logger):
     tender_data = copy.deepcopy(TEST_TENDER)
     profile_data = copy.deepcopy(TEST_PROFILE)
     agreement_data = copy.deepcopy(TEST_AGREEMENT)
@@ -95,7 +120,7 @@ async def test_check_old_agreements_is_valid(mocked_logger):
 
 @pytest.mark.asyncio
 @patch("prozorro_bridge_pricequotation.bridge.LOGGER")
-async def test_get_new_shortlisted_firms_if_contract_is_not_active(mocked_logger):
+async def test_new_get_shortlisted_firms_if_contract_is_not_active(mocked_logger):
     tender_data = copy.deepcopy(TEST_NEW_TENDER)
     agreement_data = copy.deepcopy(TEST_NEW_AGREEMENT)
     agreement = agreement_data.get('data', {})
@@ -116,7 +141,7 @@ async def test_get_new_shortlisted_firms_if_contract_is_not_active(mocked_logger
 
 @pytest.mark.asyncio
 @patch("prozorro_bridge_pricequotation.bridge.LOGGER")
-async def test_get_old_shortlisted_firms_if_contract_is_not_active(mocked_logger):
+async def test_old_get_shortlisted_firms_if_contract_is_not_active(mocked_logger):
     tender_data = copy.deepcopy(TEST_TENDER)
     agreement_data = copy.deepcopy(TEST_AGREEMENT)
     for agreement in agreement_data.get('data'):
@@ -137,7 +162,7 @@ async def test_get_old_shortlisted_firms_if_contract_is_not_active(mocked_logger
 
 @pytest.mark.asyncio
 @patch("prozorro_bridge_pricequotation.bridge.LOGGER")
-async def test_get_new_shortlisted_firms_if_contract_is_active(mocked_logger):
+async def test_new_get_shortlisted_firms_if_contract_is_active(mocked_logger):
     tender_data = copy.deepcopy(TEST_NEW_TENDER)
     agreement_data = copy.deepcopy(TEST_NEW_AGREEMENT)
     session_mock = AsyncMock()
@@ -163,7 +188,7 @@ async def test_get_new_shortlisted_firms_if_contract_is_active(mocked_logger):
 
 @pytest.mark.asyncio
 @patch("prozorro_bridge_pricequotation.bridge.LOGGER")
-async def test_get_old_shortlisted_firms_if_contract_is_active(mocked_logger):
+async def test_old_get_shortlisted_firms_if_contract_is_active(mocked_logger):
     tender_data = copy.deepcopy(TEST_TENDER)
     agreement_data = copy.deepcopy(TEST_AGREEMENT)
     session_mock = AsyncMock()
@@ -189,7 +214,7 @@ async def test_get_old_shortlisted_firms_if_contract_is_active(mocked_logger):
 
 @pytest.mark.asyncio
 @patch("prozorro_bridge_pricequotation.bridge.LOGGER")
-async def test_get_new_profile_if_status_is_not_active(mocked_logger):
+async def test_new_get_profile_if_status_is_not_active(mocked_logger):
     tender_data = copy.deepcopy(TEST_NEW_TENDER)
     profile_data = copy.deepcopy(TEST_NEW_PROFILE)
     profile_data["data"]["status"] = "not_active"
@@ -206,13 +231,24 @@ async def test_get_new_profile_if_status_is_not_active(mocked_logger):
     )
     with patch("prozorro_bridge_pricequotation.bridge.asyncio.sleep", AsyncMock()) as mocked_sleep:
         profile = await get_tender_profiles(tender_data["data"], session_mock)
+
+    session_mock.patch.assert_awaited_once_with(
+        ANY,
+        json={
+            "data": {
+                "status": "draft.unsuccessful",
+                "unsuccessfulReason": [u"Обраний профіль неактивний в системі Prozorro.Market"]
+            }
+        },
+        headers=ANY
+    )
 
     assert [] == profile
 
 
 @pytest.mark.asyncio
 @patch("prozorro_bridge_pricequotation.bridge.LOGGER")
-async def test_get_old_profile_if_status_is_not_active(mocked_logger):
+async def test_old_get_profile_if_status_is_not_active(mocked_logger):
     tender_data = copy.deepcopy(TEST_TENDER)
     profile_data = copy.deepcopy(TEST_PROFILE)
     profile_data["data"]["status"] = "not_active"
@@ -231,12 +267,23 @@ async def test_get_old_profile_if_status_is_not_active(mocked_logger):
     with patch("prozorro_bridge_pricequotation.bridge.asyncio.sleep", AsyncMock()) as mocked_sleep:
         profile = await get_tender_profiles(tender_data["data"], session_mock)
 
+    session_mock.patch.assert_awaited_once_with(
+        ANY,
+        json={
+            "data": {
+                "status": "draft.unsuccessful",
+                "unsuccessfulReason": [u"Обраний профіль неактивний в системі Prozorro.Market"]
+            }
+        },
+        headers=ANY
+    )
+
     assert profile == []
 
 
 @pytest.mark.asyncio
 @patch("prozorro_bridge_pricequotation.bridge.LOGGER")
-async def test_get_new_profile_if_status_is_general(mocked_logger):
+async def test_new_get_profile_if_status_is_general(mocked_logger):
     tender_data = copy.deepcopy(TEST_NEW_TENDER)
     profile_data = copy.deepcopy(TEST_NEW_PROFILE)
     profile_data["data"]["status"] = "general"
@@ -255,12 +302,26 @@ async def test_get_new_profile_if_status_is_general(mocked_logger):
     with patch("prozorro_bridge_pricequotation.bridge.asyncio.sleep", AsyncMock()) as mocked_sleep:
         profile = await get_tender_profiles(tender_data["data"], session_mock)
 
+    session_mock.patch.assert_awaited_once_with(
+        ANY,
+        json={
+            "data": {
+                "status": "draft.unsuccessful",
+                "unsuccessfulReason": [
+                    u"Обраний профіль (загальний) недоступний для публікації "
+                    u"закупівлі \"Запит ціни пропозиції\" в Prozorro.Market"
+                ]
+            }
+        },
+        headers=ANY
+    )
+
     assert profile == []
 
 
 @pytest.mark.asyncio
 @patch("prozorro_bridge_pricequotation.bridge.LOGGER")
-async def test_get_old_profile_if_status_is_general(mocked_logger):
+async def test_old_get_profile_if_status_is_general(mocked_logger):
     tender_data = copy.deepcopy(TEST_TENDER)
     profile_data = copy.deepcopy(TEST_PROFILE)
     profile_data["data"]["status"] = "general"
@@ -279,11 +340,91 @@ async def test_get_old_profile_if_status_is_general(mocked_logger):
     with patch("prozorro_bridge_pricequotation.bridge.asyncio.sleep", AsyncMock()) as mocked_sleep:
         profile = await get_tender_profiles(tender_data["data"], session_mock)
 
+    session_mock.patch.assert_awaited_once_with(
+        ANY,
+        json={
+            "data": {
+                "status": "draft.unsuccessful",
+                "unsuccessfulReason": [
+                    u"Обраний профіль (загальний) недоступний для публікації "
+                    u"закупівлі \"Запит ціни пропозиції\" в Prozorro.Market"
+                ]
+            }
+        },
+        headers=ANY
+    )
+
+    assert profile == []
+
+
+@pytest.mark.asyncio
+@patch("prozorro_bridge_pricequotation.bridge.LOGGER")
+async def test_new_get_profile_if_not_found(mocked_logger):
+    tender_data = copy.deepcopy(TEST_NEW_TENDER)
+    session_mock = AsyncMock()
+    session_mock.get = AsyncMock(
+        side_effect=[
+            MagicMock(status=404),
+        ]
+    )
+    session_mock.patch = AsyncMock(
+        side_effect=[
+            MagicMock(status=200),
+        ]
+    )
+
+    with patch("prozorro_bridge_pricequotation.bridge.asyncio.sleep", AsyncMock()) as mocked_sleep:
+        profile = await get_tender_profiles(tender_data["data"], session_mock)
+
+    session_mock.patch.assert_awaited_once_with(
+        ANY,
+        json={
+            "data": {
+                "status": "draft.unsuccessful",
+                "unsuccessfulReason": [u"Обраний профіль не існує в системі Prozorro.Market"]
+            }
+        },
+        headers=ANY
+    )
+
+    assert profile == []
+
+
+@pytest.mark.asyncio
+@patch("prozorro_bridge_pricequotation.bridge.LOGGER")
+async def test_old_get_profile_if_not_found(mocked_logger):
+    tender_data = copy.deepcopy(TEST_TENDER)
+    session_mock = AsyncMock()
+    session_mock.get = AsyncMock(
+        side_effect=[
+            MagicMock(status=404),
+        ]
+    )
+    session_mock.patch = AsyncMock(
+        side_effect=[
+            MagicMock(status=200),
+        ]
+    )
+
+    with patch("prozorro_bridge_pricequotation.bridge.asyncio.sleep", AsyncMock()) as mocked_sleep:
+        profile = await get_tender_profiles(tender_data["data"], session_mock)
+
+    session_mock.patch.assert_awaited_once_with(
+        ANY,
+        json={
+            "data": {
+                "status": "draft.unsuccessful",
+                "unsuccessfulReason": [u"Обраний профіль не існує в системі Prozorro.Market"]
+            }
+        },
+        headers=ANY
+    )
+
     assert profile == []
 
 @pytest.mark.asyncio
 @patch("prozorro_bridge_pricequotation.bridge.LOGGER")
-async def test_get_new_profile_if_status_is_active(mocked_logger):
+async def test_new_get_profile_if_status_is_active(mocked_logger):
     tender_data = copy.deepcopy(TEST_NEW_TENDER)
     profile_data = copy.deepcopy(TEST_NEW_PROFILE)
     session_mock = AsyncMock()
@@ -299,12 +440,14 @@ async def test_get_new_profile_if_status_is_active(mocked_logger):
     )
     with patch("prozorro_bridge_pricequotation.bridge.asyncio.sleep", AsyncMock()) as mocked_sleep:
         profile = await get_tender_profiles(tender_data["data"], session_mock)
+
+    session_mock.patch.mock_calls = []
 
     assert [profile_data] == profile
 
 @pytest.mark.asyncio
 @patch("prozorro_bridge_pricequotation.bridge.LOGGER")
-async def test_get_old_profile_if_status_is_active(mocked_logger):
+async def test_old_get_profile_if_status_is_active(mocked_logger):
     tender_data = copy.deepcopy(TEST_TENDER)
     profile_data = copy.deepcopy(TEST_PROFILE)
     session_mock = AsyncMock()
@@ -320,6 +463,8 @@ async def test_get_old_profile_if_status_is_active(mocked_logger):
     )
     with patch("prozorro_bridge_pricequotation.bridge.asyncio.sleep", AsyncMock()) as mocked_sleep:
         profile = await get_tender_profiles(tender_data["data"], session_mock)
+
+    session_mock.patch.mock_calls = []
 
     assert [profile_data] == profile
 

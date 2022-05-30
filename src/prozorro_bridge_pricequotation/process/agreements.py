@@ -40,8 +40,7 @@ async def find_recursive_agreements_by_classification_id(classification_id: str,
         agreements = await find_agreements_by_classification_id(classification_id, additional_classifications_ids, session, tender_id)
         if agreements:
             return agreements
-
-        pos = classification_id[1:].find('0')
+        pos = len(classification_id.rstrip('0')) - 1
         classification_id = classification_id[:pos] + '0' + classification_id[pos + 1:]
         await asyncio.sleep(1)
     return
@@ -49,7 +48,6 @@ async def find_recursive_agreements_by_classification_id(classification_id: str,
 
 async def _old_check_agreements(tender: dict, profile: dict, session: ClientSession) -> list:
     tender_id = tender["id"]
-    tender_date_modified = tender['dateModified']
     classification_id = profile.get("data", {}).get("classification", {}).get("id")
     additional_classifications = profile.get("data", {}).get("additionalClassifications", [])
     additional_classifications_ids = []
@@ -65,14 +63,13 @@ async def _old_check_agreements(tender: dict, profile: dict, session: ClientSess
             "There are no any active agreement for classification: {} or for levels higher".format(classification_id)
         )
         reason = u"Для обраного профілю немає активних реєстрів"
-        await decline_resource(tender_id, reason, session, tender_date_modified)
+        await decline_resource(tender_id, reason, session)
         return []
     return agreements
 
 
 async def _new_check_agreements(tender: dict, profile: dict, session: ClientSession) -> list:
     tender_id = tender["id"]
-    tender_date_modified = tender['dateModified']
     profile_agreement_id = profile.get("data", {}).get("agreementID")
     tender_agreement_id = tender.get("agreement", {}).get("id")
     if profile_agreement_id != tender_agreement_id:
@@ -80,7 +77,7 @@ async def _new_check_agreements(tender: dict, profile: dict, session: ClientSess
             "There are no any active agreement by {}".format(tender_agreement_id)
         )
         reason = u"Обрані профіля не відповідають обраному реєстру"
-        await decline_resource(tender_id, reason, session, tender_date_modified)
+        await decline_resource(tender_id, reason, session)
         return []
     return [True]
 
@@ -89,9 +86,10 @@ async def check_agreements(tender: dict, profiles: list, session: ClientSession)
     tender_id = tender["id"]
     try:
         agreements = []
-        _check_agreements = _new_check_agreements
         if not tender.get("agreement", {}).get("id"):
             _check_agreements = _old_check_agreements
+        else:
+            _check_agreements = _new_check_agreements
         for profile in profiles:
             agreement = await _check_agreements(tender, profile, session)
             if not agreement:

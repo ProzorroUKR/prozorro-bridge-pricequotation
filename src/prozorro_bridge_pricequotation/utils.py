@@ -40,7 +40,7 @@ async def patch_tender(tender_id: str, patch_data: dict, session: ClientSession)
         return True
 
 
-async def decline_resource(tender_id: str, reason: str,  session: ClientSession, tender_date_modified: str) -> dict or None:
+async def decline_resource(tender_id: str, reason: str,  session: ClientSession) -> dict or None:
     status = "draft.unsuccessful"
     patch_data = {"data": {"status": status, "unsuccessfulReason": [reason]}}
     is_patch = await patch_tender(tender_id, patch_data, session)
