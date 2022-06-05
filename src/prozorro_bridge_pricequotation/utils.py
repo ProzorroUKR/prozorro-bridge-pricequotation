@@ -1,9 +1,21 @@
 from aiohttp import ClientSession
-from prozorro_crawler.settings import API_VERSION, CRAWLER_USER_AGENT
+from prozorro_crawler.settings import (
+    API_VERSION,
+    CRAWLER_USER_AGENT,
+)
 
-from prozorro_bridge_pricequotation.journal_msg_ids import TENDER_SWITCHED, TENDER_NOT_SWITCHED, TENDER_INFO
-from prozorro_bridge_pricequotation.settings import LOGGER, API_HOST, API_TOKEN, CATALOG_API_HOST
-
+from prozorro_bridge_pricequotation.journal_msg_ids import (
+    TENDER_SWITCHED,
+    TENDER_NOT_SWITCHED,
+    TENDER_INFO,
+)
+from prozorro_bridge_pricequotation.settings import (
+    LOGGER,
+    API_HOST,
+    API_TOKEN,
+    CATALOG_API_HOST,
+    JOURNAL_PREFIX,
+)
 
 BASE_URL = f"{API_HOST}/api/{API_VERSION}"
 CATALOG_BASE_URL = f"{CATALOG_API_HOST}/api"
@@ -27,7 +39,7 @@ def journal_context(record: dict = None, params: dict = None) -> dict:
     if params is None:
         params = {}
     for k, v in params.items():
-        record["JOURNAL_" + k] = v
+        record[JOURNAL_PREFIX + k] = v
     return record
 
 
@@ -69,7 +81,8 @@ def check_tender(tender: dict) -> bool:
     if tender_procurementMethodType == "priceQuotation" and tender_status == "draft.publishing":
         return True
     LOGGER.debug(
-        f"Skipping tender {tender_id} in status {tender_status} and procurementMethodType {tender_procurementMethodType}",
+        f"Skipping tender {tender_id} in status {tender_status} "
+        f"and procurementMethodType {tender_procurementMethodType}",
         extra=journal_context(
             {"MESSAGE_ID": TENDER_INFO},
             params={"TENDER_ID": tender_id}
