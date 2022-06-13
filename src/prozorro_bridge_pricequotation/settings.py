@@ -5,7 +5,6 @@ from prozorro_crawler.settings import logger, PUBLIC_API_HOST
 LOGGER = logger
 
 API_HOST = os.environ.get("API_HOST", PUBLIC_API_HOST)
-API_OPT_FIELDS = os.environ.get("API_OPT_FIELDS", "status,procurementMethodType")
 API_TOKEN = os.environ.get("API_TOKEN", "pqBot")
 
 ERROR_INTERVAL = int(os.environ.get("ERROR_INTERVAL", 5))
