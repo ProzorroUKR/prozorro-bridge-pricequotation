@@ -5,6 +5,11 @@ from prozorro_bridge_pricequotation.bridge import process_listing
 from prozorro_bridge_pricequotation.settings import SENTRY_DSN
 
 
+API_OPT_FIELDS = (
+    "status",
+    "procurementMethodType",
+)
+
 async def data_handler(session: ClientSession, items: list) -> None:
     process_items_tasks = []
     for item in items:
@@ -18,4 +23,4 @@ if __name__ == "__main__":
         import sentry_sdk
         sentry_sdk.init(dsn=SENTRY_DSN)
 
-    main(data_handler)
+    main(data_handler, opt_fields=API_OPT_FIELDS)
